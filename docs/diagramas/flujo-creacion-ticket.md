@@ -1,41 +1,33 @@
-# Diagrama de Flujo – Creación de Tickets
-
-Este documento describe el flujo completo para la creación de un ticket de soporte TI.
-
----
-
-## 🔄 Flujo de Creación de Ticket
-
 ```mermaid
 flowchart TD
 
-A[Usuario inicia sesión] --> B{¿Credenciales válidas?}
+A[Usuario inicia sesion] --> B{Credenciales validas}
 
-B -- No --> C[Mostrar error de autenticación]
+B -- No --> C[Error de autenticacion]
 C --> A
 
-B -- Sí --> D[Crear sesión PHP]
-D --> E[Acceder al portal de tickets]
+B -- Si --> D[Crear sesion PHP]
+D --> E[Acceso al portal de tickets]
 
-E --> F[Usuario selecciona "Crear Ticket"]
-F --> G[Mostrar formulario de ticket]
+E --> F[Opcion crear ticket]
+F --> G[Formulario de ticket]
 
-G --> H{¿Formulario completo y válido?}
+G --> H{Formulario valido}
 
-H -- No --> I[Mostrar errores de validación]
+H -- No --> I[Mostrar errores de validacion]
 I --> G
 
-H -- Sí --> J[Enviar datos al Backend]
+H -- Si --> J[Enviar datos al backend]
 
-J --> K[Backend valida sesión]
-K --> L{¿Sesión activa?}
+J --> K[Backend valida sesion]
+K --> L{Sesion activa}
 
 L -- No --> A
 
-L -- Sí --> M[Insertar ticket en BD de Tickets]
-M --> N[Asignar estado inicial: Abierto]
+L -- Si --> M[Insertar ticket en BD]
+M --> N[Estado inicial Abierto]
 
-N --> O[Registrar fecha y usuario creador]
-O --> P[Confirmar creación de ticket]
+N --> O[Registrar fecha y usuario]
+O --> P[Confirmar creacion]
 
-P --> Q[Mostrar folio / número de ticket]
+P --> Q[Mostrar folio del ticket]
