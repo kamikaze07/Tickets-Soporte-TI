@@ -1,0 +1,42 @@
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal">
+
+    <h2>Crear Ticket</h2>
+
+    <form id="formCrearTicket">
+      <label>
+        Asunto
+        <input type="text" required />
+      </label>
+
+      <label>
+        Categoría
+        <select>
+          <option>Software</option>
+          <option>Hardware</option>
+          <option>Red</option>
+        </select>
+      </label>
+
+      <label>
+        Prioridad
+        <select>
+          <option>Baja</option>
+          <option>Media</option>
+          <option>Alta</option>
+        </select>
+      </label>
+
+      <label>
+        Descripción
+        <textarea rows="4"></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" id="btnCerrarModal">Cancelar</button>
+        <button type="submit" class="btn-primary">Crear Ticket</button>
+      </div>
+    </form>
+
+  </div>
+</div>

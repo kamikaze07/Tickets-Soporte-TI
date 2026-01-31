@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Usuario | Tickets de Soporte TI</title>
+  
+  <base href="/ticketssoporteti/frontend/dashboard/usuario/">
+
+  <link rel="stylesheet" href="css/dashboard.css">
+<script src="js/dashboard.js"></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div id="header"></div>
+
+  <!-- LAYOUT PRINCIPAL -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <div id="sidebar"></div>
+
+    <!-- CONTENIDO CENTRAL -->
+    <main class="content">
+      <div class="content-header">
+        <h1>Mis Tickets</h1>
+        <button id="btnCrearTicket" class="btn-primary">
+          Crear Ticket
+        </button>
+      </div>
+
+      <section class="content-body">
+        <p class="hint">
+          Aquí podrás ver el estado de tus solicitudes de soporte.
+        </p>
+      </section>
+    </main>
+
+    <!-- CARDBOARD DERECHO -->
+    <div id="cardboard"></div>
+
+  </div>
+
+  <!-- MODAL -->
+  <div id="modal"></div>
+
+  <!-- JS -->
+  <script src="js/dashboard.js"></script>
+  <script src="js/tickets.ui.js"></script>
+
+</body>
+</html>

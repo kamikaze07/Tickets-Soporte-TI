@@ -1,0 +1,216 @@
+/*🎯 Variables (alineadas al login)*/
+:root {
+  --bg-dark: #2f2f2f;
+  --bg-light: #f2f2f2;
+  --bg-white: #ffffff;
+  --text-dark: #333;
+  --border-light: #d9d9d9;
+  --primary-red: #d32f2f;
+}
+/*🔧 Base*/
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-light);
+  color: var(--text-dark);
+}
+
+/*🧭 Header*/
+.header {
+  background: var(--bg-dark);
+  color: white;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+}
+
+/*📐 Layout*/
+.layout {
+  display: flex;
+  flex-direction: column;
+}
+
+/*📁 Sidebar*/
+.sidebar {
+  position: fixed;
+  top: 56px; /* altura del header */
+  left: 0;
+  width: 220px;
+  height: calc(100% - 56px);
+  background: var(--bg-dark);
+  color: white;
+  padding: 1rem;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: .5rem 0;
+}
+
+.sidebar li.active {
+  font-weight: bold;
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    position: static;
+    transform: none;
+    height: auto;
+    width: 100%;
+  }
+}
+
+/*📦 Contenido*/
+.content {
+  padding: 1rem;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hint {
+  color: #666;
+}
+
+/*📦 Cardboard*/
+.cardboard {
+  padding: 1rem;
+}
+
+.card {
+  background: var(--bg-white);
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+/*🔴 Botón primario*/
+.btn-primary {
+  background: var(--primary-red);
+  color: white;
+  border: none;
+  padding: .6rem 1rem;
+  border-radius: 4px;
+}
+
+/*🪟 Modal*/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: var(--bg-white);
+  padding: 1.5rem;
+  border-radius: 6px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+}
+
+.hidden {
+  display: none;
+}
+
+/*💻 Desktop responsive*/
+@media (min-width: 1024px) {
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr 320px;
+  }
+
+  .sidebar {
+    display: block;
+  }
+
+}
+
+.ticket-item {
+  margin-bottom: .75rem;
+  font-size: .9rem;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: .25rem;
+  padding: .2rem .5rem;
+  border-radius: 4px;
+  font-size: .75rem;
+}
+
+.badge-open {
+  background: #f5c6c6;
+  color: #a10000;
+}
+
+.badge-progress {
+  background: #d6d6d6;
+  color: #333;
+}
+
+.badge-wait {
+  background: #e0e0e0;
+  color: #555;
+}
+
+.badge-closed {
+  background: #eeeeee;
+  color: #777;
+}
+
+.modal label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  margin-bottom: .75rem;
+}
+
+.modal input,
+.modal select,
+.modal textarea {
+  padding: .4rem;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  margin-top: .25rem;
+}
+
+.modal-actions button[type="button"] {
+  background: #e0e0e0;
+  border: none;
+}

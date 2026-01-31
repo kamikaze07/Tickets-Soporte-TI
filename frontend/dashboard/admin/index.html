@@ -1,0 +1,39 @@
+<?php
+session_start();
+
+// No logueado
+if (!isset($_SESSION["logged"]) || $_SESSION["logged"] !== true) {
+    header("Location: /ticketssoporteti/login");
+    exit;
+}
+
+// No es SUPER USUARIO
+if ($_SESSION["rol"] !== "SUPER USUARIO") {
+    http_response_code(403);
+    echo "Acceso no autorizado";
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Atención - Tickets</title>
+</head>
+<body>
+
+<h1>Panel de Atención de Tickets</h1>
+
+<p>Usuario: <strong><?= htmlspecialchars($_SESSION["usuario"]) ?></strong></p>
+<p>Rol: <?= htmlspecialchars($_SESSION["rol"]) ?></p>
+
+<ul>
+    <li>Ver tickets abiertos</li>
+    <li>Atender tickets</li>
+    <li>Cambiar estatus</li>
+</ul>
+
+<a href="/ticketssoporteti/logout">Cerrar sesión</a>
+
+</body>
+</html>
