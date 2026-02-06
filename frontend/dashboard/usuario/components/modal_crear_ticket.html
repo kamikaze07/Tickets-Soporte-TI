@@ -1,39 +1,49 @@
-<div class="modal-overlay hidden" id="modalOverlay">
+<div id="modalOverlay" class="modal-overlay hidden">
   <div class="modal">
 
     <h2>Crear Ticket</h2>
 
-    <form id="formCrearTicket">
-      <label>
-        Asunto
-        <input type="text" required />
-      </label>
+    <form class="ticket-form" id="formCrearTicket">
+      <div class="form-group">
+        <label for="titulo">Asunto</label>
+        <input
+          type="text"
+          id="titulo"
+          name="titulo"
+          required
+        />
+      </div>
 
-      <label>
-        Categoría
-        <select>
-          <option>Software</option>
-          <option>Hardware</option>
-          <option>Red</option>
-        </select>
-      </label>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="categoria">Categoría</label>
+          <select id="categoria" name="categoria">
+            <option value="Software">Software</option>
+            <option value="Hardware">Hardware</option>
+          </select>
+        </div>
 
-      <label>
-        Prioridad
-        <select>
-          <option>Baja</option>
-          <option>Media</option>
-          <option>Alta</option>
-        </select>
-      </label>
+        <div class="form-group">
+          <label for="prioridad">Prioridad</label>
+          <select id="prioridad" name="prioridad">
+            <option value="Baja">Baja</option>
+            <option value="Media">Media</option>
+            <option value="Alta">Alta</option>
+          </select>
+        </div>
+      </div>
 
-      <label>
-        Descripción
-        <textarea rows="4"></textarea>
-      </label>
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea
+          id="descripcion"
+          name="descripcion"
+          required
+        ></textarea>
+      </div>
 
       <div class="modal-actions">
-        <button type="button" id="btnCerrarModal">Cancelar</button>
+        <button type="button" id="btnCancelarModal">Cancelar</button>
         <button type="submit" class="btn-primary">Crear Ticket</button>
       </div>
     </form>

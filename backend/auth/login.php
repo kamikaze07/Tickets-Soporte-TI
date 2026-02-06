@@ -92,6 +92,7 @@ try {
     $_SESSION["usuario"]  = $user["nombre_usu"];
     $_SESSION["rol"]      = $user["priv"];
     $_SESSION["correo"]   = $user["correo"];
+    $_SESSION["nombre_usu"] = $user["nombre_usu"];
     $_SESSION["num_emp"]  = $user["num_emp"];
 
     echo json_encode([

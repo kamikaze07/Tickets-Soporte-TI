@@ -4,11 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Usuario | Tickets de Soporte TI</title>
-  
+
   <base href="/ticketssoporteti/frontend/dashboard/usuario/">
 
   <link rel="stylesheet" href="css/dashboard.css">
-<script src="js/dashboard.js"></script>
+
+  <!-- JS PRINCIPAL (una sola vez, con defer) -->
+  <script src="js/dashboard.js" defer></script>
 </head>
 <body>
 
@@ -19,7 +21,7 @@
   <div class="layout">
 
     <!-- SIDEBAR -->
-    <div id="sidebar"></div>
+    <nav id="sidebarNav" class="sidebar"></nav>
 
     <!-- CONTENIDO CENTRAL -->
     <main class="content">
@@ -31,23 +33,25 @@
       </div>
 
       <section class="content-body">
-        <p class="hint">
-          Aquí podrás ver el estado de tus solicitudes de soporte.
-        </p>
+        <div class="card">
+          <h3 id="ticketsTitle">Mis Tickets</h3>
+          <div id="ticketList"></div>
+        </div>
       </section>
-    </main>
+    </main> 
 
     <!-- CARDBOARD DERECHO -->
-    <div id="cardboard"></div>
+    <aside id="cardboard" class="cardboard"></aside>
 
   </div>
 
   <!-- MODAL -->
   <div id="modal"></div>
 
-  <!-- JS -->
-  <script src="js/dashboard.js"></script>
-  <script src="js/tickets.ui.js"></script>
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- JS SECUNDARIO -->
+  <script src="js/tickets.ui.js" defer></script>
 
 </body>
 </html>
