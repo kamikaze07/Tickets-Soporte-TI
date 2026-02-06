@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tickets | Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <base href="/ticketssoporteti/frontend/dashboard/admin/">
+
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script src="js/tickets.js" defer></script>
+</head>
+<body>
+
+<header class="header">
+  <button id="btnMenu" class="menu-btn">☰</button>
+  <span class="header-title">Tickets Soporte TI</span>
+  <span class="header-user">SUPER USUARIO</span>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebarNav" class="sidebar">
+    <ul class="sidebar-menu">
+      <li onclick="location.href='index.html'">📊 Dashboard</li>
+      <li class="active">🎫 Tickets</li>
+      <li>👥 Usuarios</li>
+      <hr>
+      <li id="btnLogout" class="logout">🚪 Cerrar sesión</li>
+    </ul>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="content">
+    <h1>Tickets</h1>
+
+    <!-- FILTERS -->
+    <section class="filters">
+      <div class="filter-group">
+        <label>Estado</label>
+        <select id="filterEstado">
+          <option value="">Todos</option>
+          <option value="Abierto">Abierto</option>
+          <option value="En Proceso">En Proceso</option>
+          <option value="En Espera">En Espera</option>
+          <option value="Cerrado">Cerrado</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Prioridad</label>
+        <select id="filterPrioridad">
+          <option value="">Todas</option>
+          <option value="Alta">Alta</option>
+          <option value="Media">Media</option>
+          <option value="Baja">Baja</option>
+        </select>
+      </div>
+
+      <button class="btn" id="btnFiltrar">Filtrar</button>
+    </section>
+
+    <!-- TABLE -->
+    <section class="table-section">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Asunto</th>
+            <th>Usuario</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="ticketsTable"></tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<div class="sidebar-overlay"></div>
+
+</body>
+</html>

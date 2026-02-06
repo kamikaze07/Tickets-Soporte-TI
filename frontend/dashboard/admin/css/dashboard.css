@@ -1,0 +1,400 @@
+/* =========================
+   BASE
+========================= */
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f8fafc;
+}
+
+/* =========================
+   HEADER
+========================= */
+.header {
+  height: 60px;
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.menu-btn {
+  font-size: 22px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.header-title {
+  font-weight: bold;
+}
+
+.header-user {
+  font-size: 14px;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.layout {
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar {
+  width: 240px;
+  background: #020617;
+  color: #fff;
+  transition: transform .3s ease, width .3s ease;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-menu li {
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.sidebar-menu li:hover,
+.sidebar-menu li.active {
+  background: #1e293b;
+}
+
+.logout {
+  color: #f87171;
+}
+
+/* =========================
+   CONTENT
+========================= */
+.content {
+  flex: 1;
+  padding: 24px;
+}
+
+/* =========================
+   FILTERS (tickets.html)
+========================= */
+.filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+
+.filter-group label {
+  margin-bottom: 4px;
+  color: #64748b;
+}
+
+.filters select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #cbd5f5;
+}
+
+/* =========================
+   TABLE (tickets.html)
+========================= */
+.table-section {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+thead {
+  background: #f1f5f9;
+}
+
+th {
+  font-size: 13px;
+  color: #475569;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+tbody tr {
+  transition: background .15s ease;
+}
+
+tbody tr:hover {
+  background: #f1f5f9;
+}
+
+/* =========================
+   BADGES (estado)
+========================= */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.abierto {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge.proceso {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge.espera {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge.cerrado {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* =========================
+   PRIORIDAD
+========================= */
+.prioridad {
+  font-weight: 600;
+}
+
+.prioridad.Alta { color: #dc2626; }
+.prioridad.Media { color: #ca8a04; }
+.prioridad.Baja { color: #16a34a; }
+
+/* =========================
+   BUTTONS
+========================= */
+.btn {
+  background: #4f46e5;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #4338ca;
+}
+
+.btn.view {
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+.btn.danger {
+  background: #dc2626;
+}
+
+.btn.danger:hover {
+  background: #b91c1c;
+}
+
+/* =========================
+   TICKET DETAIL
+========================= */
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.ticket-meta {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.ticket-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.ticket-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.05);
+}
+
+/* =========================
+   CHAT
+========================= */
+.chat {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.05);
+  display: flex;
+  flex-direction: column;
+  height: 460px;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.message {
+  max-width: 70%;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.message.user {
+  background: #e0f2fe;
+}
+
+.message.admin {
+  background: #ede9fe;
+  margin-left: auto;
+}
+
+.message-time {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* INPUT */
+.chat-input {
+  display: flex;
+  border-top: 1px solid #e5e7eb;
+}
+
+.chat-input textarea {
+  flex: 1;
+  border: none;
+  padding: 14px;
+  resize: none;
+}
+
+.chat-input textarea:focus {
+  outline: none;
+}
+
+/* =========================
+   OVERLAY / MOBILE
+========================= */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+}
+
+@media (max-width: 1023px) {
+  .sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    height: calc(100vh - 60px);
+    transform: translateX(-100%);
+    z-index: 10;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay.show {
+    display: block;
+  }
+
+  .chat {
+    height: 60vh;
+  }
+}
+
+/* =========================
+   DASHBOARD STATS
+========================= */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.05);
+}
+
+.stat-card h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.stat-card p {
+  margin-top: 8px;
+  font-size: 34px;
+  font-weight: bold;
+}
+
+/* Color cues */
+.stat-card.open p { color: #166534; }
+.stat-card.process p { color: #1e40af; }
+.stat-card.wait p { color: #92400e; }
+.stat-card.closed p { color: #374151; }
+
+/* =========================
+   QUICK ACTIONS
+========================= */
+.quick-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* =========================
+   RECENT TABLE
+========================= */
+.table-section h2 {
+  margin-top: 0;
+}

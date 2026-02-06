@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle del Ticket</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <base href="/ticketssoporteti/frontend/dashboard/admin/">
+
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script src="js/ticket.js" defer></script>
+</head>
+<body>
+
+<header class="header">
+  <button id="btnMenu" class="menu-btn">☰</button>
+  <span class="header-title">Detalle del Ticket</span>
+  <span class="header-user">SUPER USUARIO</span>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebarNav" class="sidebar">
+    <ul class="sidebar-menu">
+      <li onclick="location.href='index.html'">📊 Dashboard</li>
+      <li onclick="location.href='tickets.html'">🎫 Tickets</li>
+      <li>👥 Usuarios</li>
+      <hr>
+      <li id="btnLogout" class="logout">🚪 Cerrar sesión</li>
+    </ul>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- HEADER TICKET -->
+    <section class="ticket-header">
+      <div>
+        <h1 id="ticketTitle">Ticket #</h1>
+        <div id="ticketMeta" class="ticket-meta"></div>
+      </div>
+
+      <div class="ticket-actions">
+        <select id="estadoTicket"></select>
+        <button class="btn danger" id="btnCerrar">Cerrar ticket</button>
+      </div>
+    </section>
+
+    <!-- INFO -->
+    <section class="ticket-info">
+      <div><strong>Usuario:</strong> <span id="ticketUsuario"></span></div>
+      <div><strong>Prioridad:</strong> <span id="ticketPrioridad"></span></div>
+      <div><strong>Fecha:</strong> <span id="ticketFecha"></span></div>
+      <div><strong>Categoría:</strong> <span id="ticketCategoria"></span></div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="chat">
+      <div id="chatMessages" class="chat-messages"></div>
+
+      <div class="chat-input">
+        <textarea id="respuesta" placeholder="Escribe una respuesta para el usuario…"></textarea>
+        <button class="btn" id="btnResponder">Enviar</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="sidebar-overlay"></div>
+
+</body>
+</html>
