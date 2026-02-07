@@ -2,6 +2,7 @@
    ESTADO
 ================================ */
 let tickets = [];
+let ticketActual = null;
 
 /* ===============================
    CARGAR TICKETS
@@ -18,25 +19,12 @@ async function loadTickets() {
       return;
     }
 
-    if (!res.ok) {
-      console.error('Error HTTP:', res.status);
-      renderTickets([]);
-      return;
-    }
-
     const data = await res.json();
-
-    if (!Array.isArray(data)) {
-      console.error('Formato inválido de tickets:', data);
-      renderTickets([]);
-      return;
-    }
-
-    tickets = data;
+    tickets = Array.isArray(data) ? data : [];
     renderTickets(tickets);
 
   } catch (err) {
-    console.error('Error cargando tickets:', err);
+    console.error(err);
     renderTickets([]);
   }
 }
@@ -46,8 +34,6 @@ async function loadTickets() {
 ================================ */
 function renderTickets(list) {
   const container = document.getElementById('ticketList');
-  if (!container) return;
-
   container.innerHTML = '';
 
   if (list.length === 0) {
@@ -63,125 +49,99 @@ function renderTickets(list) {
       <div class="ticket-indicator"></div>
       <div class="ticket-content">
         <div class="ticket-title">${t.titulo}</div>
-        <div class="ticket-meta">
-          ${t.categoria} · ${t.prioridad}
-        </div>
-        <span class="ticket-status">
-          ${t.status}
-        </span>
+        <div class="ticket-meta">${t.categoria} · ${t.prioridad}</div>
+        <span class="ticket-status">${t.status}</span>
       </div>
     `;
 
-
+    item.addEventListener('click', () => verDetalle(t.id));
     container.appendChild(item);
   });
 }
 
 /* ===============================
-   CREAR TICKET
+   VER DETALLE (NUEVO)
 ================================ */
-function initCreateTicket() {
-  const form = document.getElementById('formCrearTicket');
-  if (!form) {
-    console.warn('No existe #formCrearTicket');
+async function verDetalle(ticketId) {
+  ticketActual = ticketId;
+
+  document.getElementById('ticketsListView').style.display = 'none';
+  document.getElementById('ticketDetailView').style.display = 'block';
+  document.getElementById('pageTitle').textContent = 'Detalle del Ticket';
+
+  const res = await fetch(
+    `${BASE_PATH}/backend/tickets/get_ticket_user.php?id=${ticketId}`,
+    { credentials: 'include' }
+  );
+
+  if (!res.ok) {
+    console.error('No autorizado o error al cargar ticket');
     return;
   }
 
-  // Evitar múltiples listeners
-  if (form.dataset.bound === 'true') return;
-  form.dataset.bound = 'true';
+  const t = await res.json();
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  document.getElementById('dtTitulo').textContent = t.titulo;
+  document.getElementById('dtDescripcion').textContent = t.descripcion;
+  document.getElementById('dtEstado').textContent = t.estado;
 
-    const titulo = document.getElementById('titulo');
-    const categoria = document.getElementById('categoria');
-    const prioridad = document.getElementById('prioridad');
-    const descripcion = document.getElementById('descripcion');
-
-    if (!titulo || !categoria || !prioridad || !descripcion) {
-      console.error('Campos del formulario no encontrados');
-      return;
-    }
-
-    const payload = {
-      titulo: titulo.value.trim(),
-      categoria: categoria.value,
-      prioridad: prioridad.value,
-      descripcion: descripcion.value.trim()
-    };
-
-    if (!payload.titulo || !payload.descripcion) {
-      alert('Asunto y descripción son obligatorios');
-      return;
-    }
-
-    try {
-      const res = await fetch(
-        `${BASE_PATH}/backend/tickets/create.php`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        alert(data.msg || 'Error al crear ticket');
-        return;
-      }
-
-      // Éxito
-      showToast('✅ Ticket creado correctamente');
-
-
-      // ✅ Cerrar modal
-      document.getElementById('modalOverlay')?.classList.add('hidden');
-
-      // ✅ Limpiar formulario
-      form.reset();
-
-      // ✅ Recargar tickets
-      loadTickets();
-
-    } catch (err) {
-      console.error('Error creando ticket:', err);
-
-      showToast('❌ Error al crear el ticket', 'error');
-
-      alert('Error de conexión al crear ticket');
-    }
-  });
+  cargarMensajes(ticketId);
 }
 
 
 /* ===============================
-   ESPERAR HTML DINÁMICO
+   VOLVER
 ================================ */
-function waitForTicketUI() {
-  const observer = new MutationObserver(() => {
-    if (document.getElementById('ticketList')) {
-      loadTickets();
-    }
-    if (document.getElementById('formCrearTicket')) {
-      initCreateTicket();
-    }
+document.getElementById('btnVolver').addEventListener('click', () => {
+  document.getElementById('ticketDetailView').style.display = 'none';
+  document.getElementById('ticketsListView').style.display = 'block';
+  document.getElementById('pageTitle').textContent = 'Mis Tickets';
+});
+
+/* ===============================
+   CHAT
+================================ */
+async function cargarMensajes(ticketId) {
+  const res = await fetch(
+    `${BASE_PATH}/backend/tickets/get_messages.php?ticket_id=${ticketId}`,
+    { credentials: 'include' }
+  );
+  const mensajes = await res.json();
+
+  const chat = document.getElementById('chatBox');
+  chat.innerHTML = '';
+
+  mensajes.forEach(m => {
+    const div = document.createElement('div');
+    div.className = `chat-msg ${m.autor}`; // admin | usuario
+    div.textContent = m.comentario;
+    chat.appendChild(div);
   });
 
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  chat.scrollTop = chat.scrollHeight;
 }
+
+document.getElementById('chatForm').addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const texto = chatInput.value.trim();
+  if (!texto) return;
+
+  await fetch(`${BASE_PATH}/backend/tickets/user_reply.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      ticket_id: ticketActual,
+      comentario: texto
+    })
+  });
+
+  chatInput.value = '';
+  cargarMensajes(ticketActual);
+});
 
 /* ===============================
    INIT
 ================================ */
-document.addEventListener('DOMContentLoaded', () => {
-  waitForTicketUI();
-});
+loadTickets();

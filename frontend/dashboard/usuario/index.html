@@ -9,48 +9,71 @@
 
   <link rel="stylesheet" href="css/dashboard.css">
 
-  <!-- JS PRINCIPAL (una sola vez, con defer) -->
   <script src="js/dashboard.js" defer></script>
 </head>
 <body>
 
-  <!-- HEADER -->
   <div id="header"></div>
 
-  <!-- LAYOUT PRINCIPAL -->
   <div class="layout">
 
-    <!-- SIDEBAR -->
     <nav id="sidebarNav" class="sidebar"></nav>
 
-    <!-- CONTENIDO CENTRAL -->
     <main class="content">
       <div class="content-header">
-        <h1>Mis Tickets</h1>
+        <h1 id="pageTitle">Mis Tickets</h1>
         <button id="btnCrearTicket" class="btn-primary">
           Crear Ticket
         </button>
       </div>
 
       <section class="content-body">
-        <div class="card">
-          <h3 id="ticketsTitle">Mis Tickets</h3>
+
+        <!-- LISTADO (EXISTENTE) -->
+        <div class="card" id="ticketsListView">
+          <h3>Mis Tickets</h3>
           <div id="ticketList"></div>
         </div>
-      </section>
-    </main> 
 
-    <!-- CARDBOARD DERECHO -->
+        <!-- DETALLE (NUEVO) -->
+        <div class="card" id="ticketDetailView" style="display:none">
+
+          <button id="btnVolver" class="btn-secondary">← Volver</button>
+
+          <h3 id="dtTitulo"></h3>
+          <p id="dtDescripcion"></p>
+
+          <span id="dtEstado" class="ticket-status"></span>
+
+          <hr>
+
+          <h4>Conversación</h4>
+
+          <div id="chatBox" class="chat-box"></div>
+
+          <form id="chatForm">
+            <input
+              type="text"
+              id="chatInput"
+              placeholder="Escribe tu mensaje…"
+              autocomplete="off"
+              required
+            />
+            <button class="btn-primary" type="submit">Enviar</button>
+          </form>
+
+        </div>
+
+      </section>
+    </main>
+
     <aside id="cardboard" class="cardboard"></aside>
 
   </div>
 
-  <!-- MODAL -->
   <div id="modal"></div>
-
   <div id="toast" class="toast hidden"></div>
 
-  <!-- JS SECUNDARIO -->
   <script src="js/tickets.ui.js" defer></script>
 
 </body>
