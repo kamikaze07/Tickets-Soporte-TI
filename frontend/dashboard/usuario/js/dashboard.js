@@ -197,6 +197,7 @@ async function initDashboard() {
   initSidebar();
   initModal();
   initLogout();
+  initCrearTicket();
 }
 
 function showToast(message, type = 'success') {
@@ -218,3 +219,67 @@ function showToast(message, type = 'success') {
 // DOM READY
 // ================================
 document.addEventListener('DOMContentLoaded', initDashboard);
+
+function initCrearTicket() {
+
+  const form = document.getElementById('formCrearTicket');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const titulo = document.getElementById('titulo')?.value.trim();
+    const descripcion = document.getElementById('descripcion')?.value.trim();
+    const categoria = document.getElementById('categoria')?.value;
+    const prioridad = document.getElementById('prioridad')?.value;
+
+    if (!titulo || !descripcion) {
+      showToast('Título y descripción obligatorios', 'error');
+      return;
+    }
+
+    try {
+
+      const res = await fetch(
+        `${BASE_PATH}/backend/tickets/create.php`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            titulo,
+            descripcion,
+            categoria,
+            prioridad
+          })
+        }
+      );
+
+      const data = await res.json();
+
+      if (!data.ok) {
+        showToast(data.msg || 'Error al crear ticket', 'error');
+        return;
+      }
+
+      showToast('Ticket creado correctamente');
+
+      form.reset();
+
+      document.getElementById('modalOverlay')
+        ?.classList.add('hidden');
+
+      document.body.style.overflow = 'auto';
+
+      // 🔄 Recargar lista
+      if (typeof loadTickets === 'function') {
+        loadTickets();
+      }
+
+    } catch (err) {
+      console.error(err);
+      showToast('Error de conexión', 'error');
+    }
+  });
+}
+

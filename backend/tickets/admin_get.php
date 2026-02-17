@@ -15,21 +15,25 @@ if (!$id) {
   exit;
 }
 
-/* Ticket */
+/* =========================
+   TRAER DATOS DEL TICKET
+========================= */
+
 $stmt = $pdo->prepare("
   SELECT
-    id,
-    titulo,
-    descripcion,
-    prioridad,
-    categoria,
-    status,
-    created_at,
-    usuario_num_emp
-  FROM tickets
-  WHERE id = :id
+    t.id,
+    t.titulo,
+    t.descripcion,
+    t.status,
+    t.prioridad,
+    t.categoria,
+    t.created_at,
+    t.usuario_num_emp
+  FROM tickets t
+  WHERE t.id = ?
 ");
-$stmt->execute([':id' => $id]);
+
+$stmt->execute([$id]);
 $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$ticket) {
@@ -37,17 +41,24 @@ if (!$ticket) {
   exit;
 }
 
-/* Comentarios */
+/* =========================
+   TRAER COMENTARIOS (CON ARCHIVOS)
+========================= */
+
 $stmt = $pdo->prepare("
   SELECT
     autor,
+    tipo,
     comentario,
+    archivo,
+    nombre_archivo,
     created_at
   FROM ticket_comentarios
-  WHERE ticket_id = :id
+  WHERE ticket_id = ?
   ORDER BY created_at ASC
 ");
-$stmt->execute([':id' => $id]);
+
+$stmt->execute([$id]);
 
 $ticket['comentarios'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

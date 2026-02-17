@@ -1,16 +1,41 @@
 <?php
 session_start();
+require_once '../config/database.php';
+
 header('Content-Type: application/json');
-require_once __DIR__ . '/../config/database.php';
 
-$ticketId = $_GET['ticket_id'] ?? null;
+if (!isset($_GET['ticket_id'])) {
+    echo json_encode([]);
+    exit;
+}
 
-$stmt = $pdo->prepare("
-  SELECT autor, comentario, created_at
-  FROM ticket_comentarios
-  WHERE ticket_id = :id
-  ORDER BY created_at ASC
-");
-$stmt->execute([':id' => $ticketId]);
+$ticket_id = intval($_GET['ticket_id']);
 
-echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+try {
+
+    $stmt = $pdo->prepare("
+        SELECT 
+            comentario,
+            autor,
+            tipo,
+            archivo,
+            nombre_archivo,
+            created_at
+        FROM ticket_comentarios
+        WHERE ticket_id = ?
+        ORDER BY created_at ASC
+    ");
+
+    $stmt->execute([$ticket_id]);
+
+    $mensajes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode($mensajes);
+
+} catch (Exception $e) {
+
+    http_response_code(500);
+    echo json_encode([
+        "error" => $e->getMessage()
+    ]);
+}

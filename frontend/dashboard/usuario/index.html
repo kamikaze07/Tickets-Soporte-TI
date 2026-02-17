@@ -9,7 +9,7 @@
 
   <link rel="stylesheet" href="css/dashboard.css">
 
-  <script src="js/dashboard.js" defer></script>
+  <script src="/ticketssoporteti/frontend/dashboard/usuario/js/dashboard.js" defer></script>
 </head>
 <body>
 
@@ -30,7 +30,7 @@
       <section class="content-body">
 
         <!-- LISTADO (EXISTENTE) -->
-        <div class="card" id="ticketsListView">
+        <div class="card" id="ticketsContainer">
           <h3>Mis Tickets</h3>
           <div id="ticketList"></div>
         </div>
@@ -51,16 +51,32 @@
 
           <div id="chatBox" class="chat-box"></div>
 
-          <form id="chatForm">
+         <form id="chatForm" class="chat-form">
+            <button type="button" id="btnFileUsuario" class="btn-clip">📎</button>
+
+            <input
+              type="file"
+              id="fileInputDocumento"
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+              hidden
+            />
+
+
             <input
               type="text"
-              id="chatInput"
+              id="mensaje"
               placeholder="Escribe tu mensaje…"
               autocomplete="off"
               required
             />
-            <button class="btn-primary" type="submit">Enviar</button>
+
           </form>
+         <div id="typingIndicator" style="display:none;">
+          El técnico está escribiendo...
+        </div>
+          <div id="uploadProgressContainer" class="upload-progress hidden">
+          <div id="uploadProgressBar" class="upload-progress-bar"></div>
+        </div>
 
         </div>
 
@@ -74,7 +90,13 @@
   <div id="modal"></div>
   <div id="toast" class="toast hidden"></div>
 
-  <script src="js/tickets.ui.js" defer></script>
+  <div id="imageModal" class="image-modal hidden">
+  <span id="closeImageModal">&times;</span>
+  <img id="modalImage">
+</div>
+
+
+  <script src="/ticketssoporteti/frontend/dashboard/usuario/js/tickets.ui.js" defer></script>
 
 </body>
 </html>

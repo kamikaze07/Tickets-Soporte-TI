@@ -1,71 +1,45 @@
 <?php
 session_start();
+require_once '../config/database.php';
 
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 
-require_once __DIR__ . '/../config/database.php';
-
-/* =====================================================
-   VALIDAR SESIÓN (estructura real)
-===================================================== */
 if (!isset($_SESSION['num_emp'])) {
     http_response_code(401);
-    echo json_encode(['error' => 'No autorizado']);
+    echo json_encode(['ok' => false]);
     exit;
 }
 
-/* =====================================================
-   LEER BODY
-===================================================== */
-$data = json_decode(file_get_contents('php://input'), true);
+$data = json_decode(file_get_contents("php://input"), true);
 
-$ticketId   = $data['ticket_id'] ?? null;
-$comentario = trim($data['comentario'] ?? '');
-
-if (!$ticketId || $comentario === '') {
+if (!isset($data['ticket_id']) || !isset($data['comentario'])) {
     http_response_code(400);
-    echo json_encode(['error' => 'Datos incompletos']);
+    echo json_encode(['ok' => false]);
     exit;
 }
 
-/* =====================================================
-   VALIDAR QUE EL TICKET ES DEL USUARIO
-===================================================== */
-$stmt = $pdo->prepare("
-    SELECT id
-    FROM tickets
-    WHERE id = :id
-      AND usuario_num_emp = :num_emp
-    LIMIT 1
-");
-$stmt->execute([
-    ':id'      => $ticketId,
-    ':num_emp'=> $_SESSION['num_emp']
-]);
+try {
 
-if (!$stmt->fetch()) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Ticket no autorizado']);
-    exit;
+    $stmt = $pdo->prepare("
+        INSERT INTO ticket_comentarios
+        (ticket_id, autor, tipo, comentario, created_at)
+        VALUES (?, 'usuario', 'texto', ?, NOW())
+    ");
+
+    $stmt->execute([
+        $data['ticket_id'],
+        $data['comentario']
+    ]);
+
+    echo json_encode([
+        'ok' => true
+    ]);
+
+} catch (Exception $e) {
+
+    http_response_code(500);
+    echo json_encode([
+        'ok' => false,
+        'error' => $e->getMessage()
+    ]);
 }
-
-/* =====================================================
-   INSERTAR MENSAJE
-===================================================== */
-$stmt = $pdo->prepare("
-    INSERT INTO ticket_comentarios
-        (ticket_id, autor, comentario, created_at)
-    VALUES
-        (:ticket_id, 'usuario', :comentario, NOW())
-");
-
-$stmt->execute([
-    ':ticket_id' => $ticketId,
-    ':comentario'=> $comentario
-]);
-
-/* =====================================================
-   RESPUESTA OK
-===================================================== */
-echo json_encode(['ok' => true]);
-exit;

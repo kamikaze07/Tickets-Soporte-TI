@@ -55,20 +55,51 @@
       <div><strong>Categoría:</strong> <span id="ticketCategoria"></span></div>
     </section>
 
+    <!-- DESCRIPCIÓN DEL TICKET -->
+    <section class="ticket-description">
+      <h3>Descripción</h3>
+      <p id="ticketDescripcion" class="ticket-descripcion"></p>
+    </section>
+
     <!-- CHAT -->
     <section class="chat">
       <div id="chatMessages" class="chat-messages"></div>
 
-      <div class="chat-input">
-        <textarea id="respuesta" placeholder="Escribe una respuesta para el usuario…"></textarea>
-        <button class="btn" id="btnResponder">Enviar</button>
-      </div>
+    <div class="chat-input">
+      <label class="btn-clip">
+        📎
+        <input type="file" id="fileInputAdmin" accept="image/*"
+  capture="environment"/>
+      </label>
+
+
+      <textarea
+        id="respuesta"
+        placeholder="Escribe una respuesta para el usuario…"
+      ></textarea>
+
+      <button class="btn" id="btnResponder">Enviar</button>
+    </div>
+
     </section>
+    <div id="typingIndicator" class="typing-indicator hidden">
+  El usuario está escribiendo…
+  <div id="uploadProgressContainer" class="upload-progress hidden">
+  <div id="uploadProgressBar" class="upload-progress-bar"></div>
+</div>
+
+</div>
 
   </main>
 </div>
 
 <div class="sidebar-overlay"></div>
+
+<div id="imageModal" class="image-modal hidden">
+  <span id="closeImageModal">&times;</span>
+  <img id="modalImage">
+</div>
+
 
 </body>
 </html>

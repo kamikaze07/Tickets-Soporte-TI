@@ -1,38 +1,59 @@
 <?php
+require_once __DIR__ . '/../config/database.php';
 session_start();
+
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../config/database.php';
-
-if (!isset($_SESSION['num_emp'])) {
-  http_response_code(401);
-  exit;
+// 🔐 Validar sesión
+if (!isset($_SESSION['logged']) || $_SESSION['logged'] !== true) {
+    http_response_code(401);
+    echo json_encode(["error" => "No autorizado"]);
+    exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
-
-$ticketId  = $data['ticket_id'] ?? null;
-$comentario = trim($data['comentario'] ?? '');
-
-if (!$ticketId || $comentario === '') {
-  http_response_code(400);
-  exit;
+// 🔐 Validar que sea SUPER USUARIO
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'SUPER USUARIO') {
+    http_response_code(403);
+    echo json_encode(["error" => "Sin permisos"]);
+    exit;
 }
 
-$stmt = $pdo->prepare("
-  INSERT INTO ticket_comentarios (ticket_id, autor, comentario)
-  VALUES (:ticket, 'admin', :comentario)
-");
-$stmt->execute([
-  ':ticket' => $ticketId,
-  ':comentario' => $comentario
-]);
+try {
 
-/* Si estaba Abierto → En proceso */
-$pdo->prepare("
-  UPDATE tickets
-  SET status = 'En proceso'
-  WHERE id = :id AND status = 'Abierto'
-")->execute([':id' => $ticketId]);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-echo json_encode(['ok' => true]);
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    $ticket_id = $data['ticket_id'] ?? null;
+    $comentario = trim($data['comentario'] ?? '');
+
+    if (!$ticket_id || $comentario === '') {
+        http_response_code(400);
+        echo json_encode(["error" => "Datos incompletos"]);
+        exit;
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO ticket_comentarios
+        (ticket_id, autor, tipo, archivo, nombre_archivo, comentario, created_at)
+        VALUES
+        (:ticket_id, 'admin', 'texto', NULL, NULL, :comentario, NOW())
+    ");
+
+    $stmt->execute([
+        ':ticket_id' => $ticket_id,
+        ':comentario' => $comentario
+    ]);
+
+    echo json_encode([
+        "ok" => true,
+        "id" => $pdo->lastInsertId()
+    ]);
+
+} catch (PDOException $e) {
+
+    http_response_code(500);
+    echo json_encode([
+        "error" => $e->getMessage()
+    ]);
+}
