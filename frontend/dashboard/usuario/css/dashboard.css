@@ -318,23 +318,23 @@ body {
   gap: 12px;
 }
 
-/* Ticket individual */
 .ticket-item {
-  background: transparent;
-  padding: 14px 6px;
-  border-bottom: 1px solid #e5e7eb;
   display: flex;
-  align-items: center;
-  gap: 14px;
+  gap: 16px;
+  padding: 18px 14px;
+  border-radius: 14px;
+  transition: all .2s ease;
+  cursor: pointer;
 }
-
 
 .ticket-item:hover {
   background: #f9fafb;
+  transform: translateX(4px);
 }
 
+
 .ticket-indicator {
-  width: 6px;
+  width: 5px;
   height: 36px;
   border-radius: 999px;
   flex-shrink: 0;
@@ -445,9 +445,10 @@ body {
 }
 
 .card {
-  background: #f1f5f9; /* gris muy suave, no blanco */
-  border-radius: 12px;
-  padding: 16px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.06);
 }
 
 /* ===============================
@@ -625,4 +626,16 @@ body {
   font-size: 30px;
   color: white;
   cursor: pointer;
+}
+
+.ticket-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #111;
+}
+
+.ticket-meta {
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
 }

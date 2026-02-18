@@ -259,29 +259,6 @@ function initActions() {
     .addEventListener('change', e =>
       cambiarEstado(e.target.value)
     );
-    // 📎 Inicializar clip después de que el ticket esté cargado
-const chatContainer = document.querySelector(".chat-actions");
-const textarea = document.getElementById("respuesta");
-
-if (chatContainer && textarea && !document.getElementById("btnFileAdmin")) {
-
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.id = "btnFileAdmin";
-  btn.className = "btn-clip";
-  btn.textContent = "📎";
-
-  const inputFile = document.createElement("input");
-  inputFile.type = "file";
-  inputFile.id = "fileInputAdmin";
-  inputFile.hidden = true;
-
-
-  chatContainer.insertBefore(btn, chatContainer.firstChild);
-  chatContainer.appendChild(inputFile);
-
-  btn.addEventListener("click", () => inputFile.click());
-}
 
 }
 
@@ -405,11 +382,16 @@ function enviarArchivoAdmin(file) {
 
 function initClip() {
 
+  const btnFile = document.getElementById("btnFileAdmin");
   const inputFile = document.getElementById("fileInputAdmin");
   const textarea = document.getElementById("respuesta");
 
-  if (!inputFile) return;
+  if (!btnFile || !inputFile) return;
 
+  // 📎 Abrir selector normal
+  btnFile.onclick = () => inputFile.click();
+
+  // Cuando selecciona archivo
   inputFile.addEventListener("change", async function () {
 
     if (!TICKET_ID) return;
@@ -425,9 +407,10 @@ function initClip() {
       }
     }
 
-    inputFile.value = "";
+    this.value = "";
   });
 
+  // 📋 Pegar imagen
   if (textarea) {
     textarea.addEventListener("paste", async (e) => {
 
@@ -447,7 +430,6 @@ function initClip() {
     });
   }
 }
-
 
 function openImageModal(src) {
   const modal = document.getElementById("imageModal");

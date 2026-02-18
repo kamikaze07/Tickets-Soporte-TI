@@ -74,27 +74,46 @@ function renderTickets(tickets) {
   const container = document.getElementById('ticketsContainer');
   if (!container) return;
 
-  container.innerHTML = '';
+  container.innerHTML = '<h3>Mis Tickets</h3>';
 
   if (!tickets.length) {
-    container.innerHTML = '<p>No hay tickets.</p>';
+    container.innerHTML += '<p>No hay tickets aún.</p>';
     return;
   }
 
   tickets.forEach(ticket => {
 
-    const row = document.createElement('div');
-    row.className = 'ticket-row'; // 👈 ESTA ES LA CLASE ORIGINAL DE TU CSS
+    const estadoTexto = ticket.estado || 'Abierto';
 
-    row.innerHTML = `
-      <span class="ticket-id">#${ticket.id}</span>
-      <span class="ticket-title">${ticket.titulo}</span>
-      <button class="btn-ver" onclick="verDetalle(${ticket.id})">Ver</button>
+    const estadoClass = `status-${estadoTexto
+      .toLowerCase()
+      .replace(/\s/g, '-')}`;
+
+    const div = document.createElement('div');
+    div.className = `ticket-item ${estadoClass}`;
+
+    div.innerHTML = `
+      <div class="ticket-indicator"></div>
+
+      <div class="ticket-content">
+        <div class="ticket-title">
+          #${ticket.id} - ${ticket.titulo}
+        </div>
+
+        <div class="ticket-meta">
+          Estado: <span class="ticket-status">${estadoTexto}</span>
+        </div>
+      </div>
     `;
 
-    container.appendChild(row);
+    div.addEventListener('click', () => {
+      verDetalle(ticket.id);
+    });
+
+    container.appendChild(div);
   });
 }
+
 
 /* ===============================
    VER DETALLE

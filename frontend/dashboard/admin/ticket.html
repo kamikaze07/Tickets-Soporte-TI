@@ -66,11 +66,14 @@
       <div id="chatMessages" class="chat-messages"></div>
 
     <div class="chat-input">
-      <label class="btn-clip">
-        📎
-        <input type="file" id="fileInputAdmin" accept="image/*"
-  capture="environment"/>
-      </label>
+    <button type="button" id="btnFileAdmin" class="btn-clip">📎</button>
+
+    <input
+      type="file"
+      id="fileInputAdmin"
+      accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+      hidden
+    />
 
 
       <textarea

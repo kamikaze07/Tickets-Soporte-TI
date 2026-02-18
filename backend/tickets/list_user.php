@@ -25,7 +25,7 @@ try {
             descripcion,
             prioridad,
             categoria,
-            status,
+            status AS estado,
             created_at
         FROM tickets
         WHERE usuario_num_emp = :num_emp
