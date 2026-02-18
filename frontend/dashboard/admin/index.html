@@ -6,8 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <base href="/ticketssoporteti/frontend/dashboard/admin/">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <link rel="stylesheet" href="css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="js/dashboard.js" defer></script>
 </head>
 <body>
@@ -17,17 +19,34 @@
   <span class="header-title">Dashboard</span>
   <span class="header-user">SUPER USUARIO</span>
 </header>
+<div id="topLoader"></div>
+
 
 <div class="layout">
 
   <!-- SIDEBAR -->
   <nav id="sidebarNav" class="sidebar">
     <ul class="sidebar-menu">
-      <li class="active">📊 Dashboard</li>
-      <li onclick="location.href='tickets.html'">🎫 Tickets</li>
-      <li>👥 Usuarios</li>
-      <hr>
-      <li id="btnLogout" class="logout">🚪 Cerrar sesión</li>
+      <li class="active">
+  <span class="material-icons">dashboard</span>
+  Dashboard
+</li>
+
+<li onclick="location.href='tickets.html'">
+  <span class="material-icons">confirmation_number</span>
+  Tickets
+</li>
+
+<li>
+  <span class="material-icons">group</span>
+  Usuarios
+</li>
+
+<li id="btnLogout" class="logout">
+  <span class="material-icons">logout</span>
+  Cerrar sesión
+</li>
+
     </ul>
   </nav>
 
@@ -55,7 +74,20 @@
         <h3>Cerrados</h3>
         <p id="kpiCerrados">0</p>
       </div>
+
+      <div class="stat-card critical" id="kpiCriticos">
+        <h3>Tickets críticos</h3>
+        <p id="kpiCriticosNum">0</p>
+      </div>
     </section>
+
+    <section class="chart-section">
+      <div class="chart-card">
+        <h3>Distribución de tickets</h3>
+        <canvas id="ticketsChart"></canvas>
+      </div>
+    </section>
+
 
     <!-- QUICK ACTIONS -->
     <section class="quick-actions">

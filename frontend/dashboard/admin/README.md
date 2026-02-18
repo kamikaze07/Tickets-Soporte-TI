@@ -1,211 +1,361 @@
-# 🛠️ Módulo de Administración – Tickets de Soporte TI
+🛠️ Módulo de Administración – Tickets de Soporte TI
 
-Este módulo corresponde al **panel de administración** del sistema **Tickets de Soporte TI**.  
-Está diseñado para que el **SUPER USUARIO / ADMIN** pueda **atender, gestionar y cerrar tickets** creados por los usuarios del sistema.
+Este módulo corresponde al panel de administración del sistema Tickets de Soporte TI.
 
-El enfoque principal de este módulo es la **atención de tickets**, proporcionando una experiencia clara, rápida y orientada al trabajo diario del área de TI.
+Está diseñado para que el Administrador / SUPER USUARIO pueda monitorear, atender y cerrar tickets creados por los usuarios del sistema, con una experiencia optimizada tanto para desktop como móvil, con enfoque en productividad diaria del área de TI.
 
----
-
-## 🎯 Objetivo del Módulo
+🎯 Objetivo del Módulo
 
 Permitir que el administrador pueda:
 
-- Visualizar el estado general del sistema
-- Revisar tickets creados por los usuarios
-- Atender tickets mediante comentarios
-- Cambiar el estado de los tickets
-- Cerrar tickets una vez resueltos
-- Trabajar desde desktop o dispositivos móviles
+Visualizar el estado general del sistema en tiempo real
 
----
+Monitorear KPIs de tickets
 
-## 🧱 Arquitectura General
+Revisar y filtrar tickets
 
-El módulo está dividido en **Frontend** y **Backend**, comunicándose mediante **fetch (AJAX)** y **JSON**, usando sesiones PHP para seguridad.
+Atender tickets mediante comentarios
 
-Admin (Frontend)
+Cambiar el estado de los tickets
+
+Cerrar tickets una vez resueltos
+
+Trabajar cómodamente desde móvil o escritorio
+
+Tener actualización automática del dashboard
+
+🧱 Arquitectura General
+
+El módulo está dividido en:
+
+Frontend (HTML + CSS + JS)
 ↓ fetch / JSON
-Admin (Backend PHP)
+Backend (PHP + PDO)
 ↓
 Base de Datos (MySQL)
 
----
+Comunicación:
 
-# 🎨 FRONTEND – Dashboard Admin
+Fetch (AJAX)
+
+Respuestas JSON
+
+Autenticación mediante sesiones PHP
+
+🎨 FRONTEND – Dashboard Admin
 
 Ubicación:
+
 frontend/dashboard/admin/
 
-### 📁 Estructura
-
+📁 Estructura
 admin/
-├── index.html # Dashboard principal
-├── tickets.html # Listado y filtrado de tickets
-├── ticket.html # Detalle y atención de un ticket
+├── index.html          # Dashboard principal
+├── tickets.html        # Listado y filtrado de tickets
+├── ticket.html         # Detalle y atención de un ticket
 ├── css/
-│ └── dashboard.css # Estilos globales del admin
+│   └── dashboard.css   # Estilos globales del módulo admin
 └── js/
-├── dashboard.js # UX del dashboard principal
-├── tickets.js # Gestión de tickets
-└── ticket.js # Atención de ticket
+    ├── dashboard.js    # Lógica del dashboard
+    ├── tickets.js      # Gestión del listado
+    └── ticket.js       # Atención y chat del ticket
 
----
+📊 Dashboard Principal (index.html)
 
-## 📊 Dashboard Principal (`index.html`)
+El dashboard ahora está 100% conectado al backend.
+
+Funciones actuales:
+
+KPIs reales por estado
+
+Tarjeta de tickets críticos
+
+Últimos 5 tickets dinámicos
+
+Gráfico circular de distribución por estado
+
+Auto refresh cada 30 segundos
+
+Nombre real del administrador en el header
+
+Logout seguro con destrucción de sesión
+
+🔢 KPIs Dinámicos
+
+Estados:
+
+Abierto
+
+En Proceso
+
+En Espera
+
+Cerrado
+
+Los valores se obtienen desde:
+
+backend/dashboard/admin_stats.php
+
+📈 Gráfico de Distribución
+
+Tipo: Doughnut (Chart.js)
+
+Muestra distribución por estado
+
+Adaptado para desktop y móvil
+
+Diseño compacto en dispositivos móviles
+
+🔄 Auto Refresh
+
+El dashboard se actualiza automáticamente cada 30 segundos:
+
+KPIs
+
+Últimos tickets
+
+Tickets críticos
+
+Gráfico
+
+📱 Optimización Móvil
+
+El dashboard fue adaptado con enfoque tipo app:
+
+KPIs compactos en 2 columnas
+
+Gráfico reducido proporcionalmente
+
+Tabla convertida a formato tipo tarjetas
+
+Botones full-width táctiles
+
+Espaciado optimizado
+
+Sidebar colapsable
+
+Se buscó sensación de aplicación nativa.
+
+🎫 Módulo de Atención de Tickets
+📄 Listado (tickets.html)
 
 Función:
-- Vista general del sistema
-- KPIs visuales de tickets
-- Acceso rápido a tickets recientes
 
-### Elementos UX:
-- Tarjetas KPI:
-  - Abiertos
-  - En proceso
-  - En espera
-  - Cerrados
-- Acciones rápidas
-- Tabla de últimos tickets
+Mostrar todos los tickets
 
-> ⚠️ Actualmente usa datos simulados, pero está **preparado para conectarse al backend**.
+Filtrar por:
 
----
+Estado
 
-## 🎫 Módulo de Atención de Tickets (Frontend)
+Prioridad
 
-### 📄 Listado de Tickets (`tickets.html`)
+UX:
 
-Función:
-- Mostrar todos los tickets del sistema
-- Permitir filtrado por:
-  - Estado
-  - Prioridad
+Badges de estado
 
-### UX Destacado:
-- Estados con **badges visuales**
-- Prioridad con colores
-- Hover de filas
-- Botón claro de acción (**Ver**)
+Colores por prioridad
 
-### Backend consumido:
+Hover en desktop
+
+Diseño tipo tarjeta en móvil
+
+Botón claro de acción: Ver
+
+Backend consumido:
 GET /backend/tickets/admin_list.php
 
----
-
-### 📄 Detalle del Ticket (`ticket.html`)
+📄 Detalle del Ticket (ticket.html)
 
 Función:
-- Atender un ticket específico
-- Comunicarse con el usuario
-- Cambiar estado del ticket
 
-### Elementos clave:
-- Información del ticket:
-  - Usuario
-  - Prioridad
-  - Categoría
-  - Fecha
-- Selector de estado
-- Botón para cerrar ticket
-- Chat de atención (admin / usuario)
+Visualizar información completa
 
-### UX:
-- Conversación tipo chat
-- Mensajes diferenciados por rol
-- Timestamps
-- Auto-scroll
-- Feedback inmediato tras acciones
+Conversación tipo chat
 
-### Backend consumido:
-GET /backend/tickets/admin_get.php?id=#
+Cambiar estado
+
+Responder al usuario
+
+Cerrar ticket
+
+Información mostrada:
+
+ID
+
+Usuario
+
+Prioridad
+
+Categoría
+
+Estado
+
+Fecha
+
+Descripción
+
+Chat de Atención
+
+Mensajes diferenciados por rol (admin / usuario)
+
+Timestamps
+
+Auto-scroll
+
+Soporte para archivos adjuntos
+
+Conversación ordenada cronológicamente
+
+Endpoints utilizados:
+GET  /backend/tickets/admin_get.php?id=#
 POST /backend/tickets/admin_reply.php
 POST /backend/tickets/admin_update_status.php
 
----
-
-# ⚙️ BACKEND – Administración de Tickets
+⚙️ BACKEND – Administración
 
 Ubicación:
-backend/tickets/
 
-### 📁 Estructura
+backend/
+
+📁 Estructura relevante
+auth/
+├── login.php
+└── logout.php
+
+dashboard/
+└── admin_stats.php
 
 tickets/
-├── admin_list.php # Lista todos los tickets
-├── admin_get.php # Detalle de un ticket
-├── admin_reply.php # Respuesta del admin
-├── admin_update_status.php # Cambio de estado del ticket
+├── admin_list.php
+├── admin_get.php
+├── admin_reply.php
+└── admin_update_status.php
 
-Todos los endpoints:
-- Usan **PDO**
-- Validan **sesión activa**
-- Trabajan con **JSON**
-- Están pensados para consumo vía AJAX
+📊 Endpoint Dashboard – admin_stats.php
 
----
+Devuelve:
 
-## 🗄️ Base de Datos (Tablas involucradas)
+{
+  "admin_nombre": "CESAR01",
+  "kpis": {
+    "Abierto": 0,
+    "En Proceso": 0,
+    "En Espera": 1,
+    "Cerrado": 11
+  },
+  "criticos": 0,
+  "ultimos": [ ... ]
+}
 
-### Tabla `tickets`
-Campos usados por el módulo admin:
-- `id`
-- `titulo`
-- `descripcion`
-- `prioridad`
-- `categoria`
-- `status`
-- `created_at`
-- `usuario_num_emp`
 
-### Tabla `ticket_comentarios`
-Usada para la atención del ticket:
+Incluye:
 
-```sql
+Nombre del admin desde sesión
+
+Conteo por estado
+
+Tickets críticos (Alta + no Cerrado)
+
+Últimos 5 tickets ordenados por fecha
+
+🗄️ Base de Datos
+Tabla tickets
+id
+usuario_num_emp
+tecnico_num_emp
+titulo
+descripcion
+prioridad   ENUM('Baja','Media','Alta')
+categoria
+status      ENUM('Abierto','En Espera','En Proceso','Cerrado')
+created_at
+updated_at
+
+Tabla ticket_comentarios
 id
 ticket_id
-autor        -- 'admin' | 'usuario'
+autor           -- 'admin' | 'usuario'
 comentario
+archivo
+nombre_archivo
 created_at
-🔄 Flujo de Atención de un Ticket
-Admin abre tickets.html
-        ↓
-Selecciona un ticket
-        ↓
-ticket.html?id=#
-        ↓
-Lee información y mensajes
-        ↓
-Responde al usuario
-        ↓
-Cambia estado (Abierto → En Proceso / En Espera)
-        ↓
+
+🔄 Flujo de Atención
+
+Admin abre dashboard
+
+Visualiza KPIs y últimos tickets
+
+Accede a tickets.html
+
+Selecciona ticket
+
+Atiende conversación
+
+Cambia estado
+
 Cierra ticket
+
 🔐 Seguridad
-Basada en sesiones PHP
-Validación de usuario autenticado ($_SESSION['num_emp'])
-Endpoints pensados para rol ADMIN / SUPER USUARIO
-Acceso directo bloqueado si no hay sesión
-🎨 UX y Diseño
-Diseño responsive (desktop + móvil)
+
+Autenticación por sesión PHP
+
+Validación de $_SESSION['num_emp']
+
+Logout destruye sesión completamente
+
+Endpoints bloquean acceso sin sesión
+
+Uso de PDO con prepared statements
+
+🎨 UX & Diseño
+
+Responsive real (no solo adaptable)
+
+Diseño compacto tipo app en móvil
+
 Sidebar colapsable
+
 Badges de estado
-Prioridades visuales
-Jerarquía clara de información
-Pensado para uso diario en TI
+
+Colores por prioridad
+
+Gráfico visual de distribución
+
+Animación ligera en KPIs
+
+Auto actualización
+
+Experiencia enfocada en productividad TI
+
 🚀 Posibles Mejoras Futuras
-Conectar KPIs del dashboard al backend
-Notificaciones al usuario cuando el admin responde
-Historial de cambios de estado
-SLA y tiempos de atención
-Adjuntar archivos en tickets
-Métricas por técnico / administrador
-✅ Estado del Módulo
-✔ Funcional
-✔ UX pulido
-✔ Backend real
-✔ Escalable
+
+Notificaciones en tiempo real (WebSocket)
+
+Métricas por técnico
+
+SLA y tiempos promedio de atención
+
+Filtros avanzados
+
+Exportación de reportes
+
+Dashboard con métricas históricas
+
+Notificaciones push
+
+✅ Estado Actual del Módulo
+
+✔ Dashboard conectado al backend
+✔ KPIs reales
+✔ Últimos tickets dinámicos
+✔ Tickets críticos detectados
+✔ Gráfico funcional
+✔ Auto refresh
+✔ Logout seguro
+✔ UX móvil optimizada
+✔ Backend funcional
 ✔ Listo para producción
-Autor:
-Proyecto Tickets de Soporte TI
-Módulo de Administración – Atención de Tickets
+
+Proyecto: Tickets de Soporte TI
+Módulo: Administración – Atención de Tickets

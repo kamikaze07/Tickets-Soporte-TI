@@ -522,3 +522,230 @@ tbody tr:hover {
   opacity: 0;
   cursor: pointer;
 }
+
+
+/* =========================
+   KPI ANIMATION
+========================= */
+.stat-card {
+  transition: transform .2s ease, box-shadow .2s ease;
+  cursor: pointer;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+
+/* Parpadeo suave si hay abiertos */
+.stat-card.alert {
+  animation: pulse 1.6s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(220,38,38,.4); }
+  70% { box-shadow: 0 0 0 10px rgba(220,38,38,0); }
+  100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+}
+
+/* Tarjeta críticos */
+.stat-card.critical {
+  background: linear-gradient(135deg,#fee2e2,#fecaca);
+}
+
+.stat-card.critical p {
+  color: #b91c1c;
+}
+
+/* =========================
+   TOP LOADER
+========================= */
+#topLoader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0;
+  background: #4f46e5;
+  z-index: 9999;
+  transition: width .4s ease;
+}
+
+/* =========================
+   CHART SECTION
+========================= */
+.chart-section {
+  margin-bottom: 24px;
+}
+
+.chart-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.05);
+}
+
+.chart-card h3 {
+  margin-top: 0;
+}
+
+/* =========================
+   PROGRESS BAR
+========================= */
+.progress-container {
+  margin-top: 10px;
+  background: #e5e7eb;
+  border-radius: 20px;
+  overflow: hidden;
+  height: 10px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #4f46e5;
+  width: 0%;
+  transition: width .5s ease;
+}
+
+.chart-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.05);
+  height: 380px;           /* 🔥 límite visual */
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-card canvas {
+  flex: 1;
+  max-height: 300px;       /* tamaño real del gráfico */
+}
+
+.chart-card {
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+    border-radius: 14px;
+    min-height: 85px;
+  }
+
+  .stat-card h3 {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .stat-card p {
+    font-size: 20px;
+    margin: 0;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .chart-card {
+    height: 230px;
+    padding: 14px;
+  }
+
+  .chart-card h2 {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .chart-card canvas {
+    max-height: 170px;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .quick-actions {
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+}
+
+
+@media (max-width: 768px) {
+
+  .content {
+    padding: 12px;
+  }
+
+  .table-section {
+    padding: 14px;
+  }
+
+}
+
+
+@media (max-width: 768px) {
+
+  .header {
+    padding: 10px 14px;
+  }
+
+  .header-title {
+    font-size: 16px;
+  }
+
+  .header-user {
+    font-size: 13px;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  table thead {
+    display: none;
+  }
+
+  table, tbody, tr, td {
+    display: block;
+    width: 100%;
+  }
+
+  table tr {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,.05);
+  }
+
+  table td {
+    border: none;
+    padding: 4px 0;
+    font-size: 13px;
+  }
+
+  table td:first-child {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 12px;
+  }
+
+  table td:last-child {
+    margin-top: 6px;
+  }
+
+}
