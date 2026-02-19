@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventario TI | Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <base href="/ticketssoporteti/frontend/dashboard/admin/">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="inventario/css/inventario.css">
+
+  <script src="js/dashboard.js" defer></script>
+  <script src="inventario/js/inventario.js" defer></script>
+</head>
+
+<!-- MODAL ASIGNAR -->
+<div id="modalAsignar" class="modal">
+  <div class="modal-content">
+    <h3>Asignar Equipo</h3>
+
+    <select id="usuarioSelect"></select>
+
+    <div class="modal-actions">
+      <button id="btnConfirmarAsignacion" class="btn">Asignar</button>
+      <button id="btnCerrarAsignar" class="btn cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGREGAR EQUIPO -->
+<div id="modalEquipo" class="modal">
+  <div class="modal-content">
+    <h3>Agregar Equipo</h3>
+
+    <label>Tipo</label>
+    <select id="tipo">
+      <option value="Computadora">Computadora</option>
+      <option value="Monitor">Monitor</option>
+      <option value="Impresora">Impresora</option>
+    </select>
+
+    <label>Marca (opcional)</label>
+    <input type="text" id="marca" />
+
+    <label>Modelo (opcional)</label>
+    <input type="text" id="modelo" />
+
+    <label>Número de serie (opcional)</label>
+    <input type="text" id="numero_serie" />
+
+    <!-- SECCIÓN DINÁMICA -->
+    <div id="specsContainer"></div>
+
+    <div class="modal-actions">
+      <button id="btnGuardarEquipo" class="btn">Guardar</button>
+      <button id="btnCerrarModal" class="btn cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+
+<body>
+
+<header class="header">
+  <button id="btnMenu" class="menu-btn">☰</button>
+  <span class="header-title">Inventario TI</span>
+  <span class="header-user">SUPER USUARIO</span>
+</header>
+
+<div id="topLoader"></div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebarNav" class="sidebar">
+    <ul class="sidebar-menu">
+      <li onclick="location.href='../admin'">
+        <span class="material-icons">dashboard</span>
+        Dashboard
+      </li>
+
+      <li onclick="location.href='../admin/tickets.html'">
+        <span class="material-icons">confirmation_number</span>
+        Tickets
+      </li>
+
+      <li class="active">
+        <span class="material-icons">inventory_2</span>
+        Inventario TI
+      </li>
+
+      <li>
+        <span class="material-icons">group</span>
+        Usuarios
+      </li>
+
+      <li id="btnLogout" class="logout">
+        <span class="material-icons">logout</span>
+        Cerrar sesión
+      </li>
+    </ul>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <section class="table-section">
+      <div class="inventario-header">
+        <h2>📦 Inventario TI</h2>
+        <button id="btnAgregar" class="btn">+ Agregar Equipo</button>
+      </div>
+
+      <div class="inventario-filtros">
+        <select id="filtroEstado">
+          <option value="">Todos los estados</option>
+        </select>
+
+        <select id="filtroTipo">
+          <option value="">Todos los tipos</option>
+        </select>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tipo</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Estado</th>
+            <th>Asignado a</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaEquipos"></tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<div class="sidebar-overlay"></div>
+
+</body>
+</html>

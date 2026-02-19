@@ -1,0 +1,96 @@
+.inventario-filtros {
+  margin: 15px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.inventario-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.inventario-tabla th,
+.inventario-tabla td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e5e5;
+  text-align: left;
+}
+
+.inventario-tabla th {
+  background: #f5f6fa;
+}
+
+/* BADGES */
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.badge-disponible {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-asignado {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.badge-reparacion {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge-baja {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.badge-qr-inactivo {
+  background: #343a40;
+  color: #fff;
+}
+
+/* MODAL */
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-content input,
+.modal-content select {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn.cancel {
+  background: #ccc;
+}
