@@ -23,6 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("tipo").addEventListener("change", renderSpecs);
     renderSpecs();
 
+    document.getElementById("filtroTipo")
+    .addEventListener("change", () => cargarEquipos());
+
+    document.getElementById("filtroEstado")
+        .addEventListener("change", () => cargarEquipos());
+
 });
 
 function cargarEquipos() {
@@ -46,40 +52,52 @@ function cargarEquipos() {
 
 function renderTabla(equipos) {
 
+    const filtroTipo = document.getElementById("filtroTipo").value;
+    const filtroEstado = document.getElementById("filtroEstado").value;
+
+    const equiposFiltrados = equipos.filter(eq => {
+
+        const coincideTipo = filtroTipo ? eq.tipo === filtroTipo : true;
+        const coincideEstado = filtroEstado ? eq.estado === filtroEstado : true;
+
+        return coincideTipo && coincideEstado;
+    });
+
     const tbody = document.getElementById("tablaEquipos");
     tbody.innerHTML = "";
 
-    if (equipos.length === 0) {
+    if (equiposFiltrados.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align:center;">No hay equipos registrados</td>
+                <td colspan="7" style="text-align:center;">Sin resultados</td>
             </tr>
         `;
         return;
     }
 
-    equipos.forEach(eq => {
+    equiposFiltrados.forEach(eq => {
 
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
             <td>${eq.identificador}</td>
             <td>${eq.tipo}</td>
-            <td>${eq.marca}</td>
-            <td>${eq.modelo}</td>
+            <td>${eq.marca || "-"}</td>
+            <td>${eq.modelo || "-"}</td>
             <td>${renderEstado(eq.estado)}</td>
-            <td>${eq.usuario_nombre ? eq.usuario_nombre : "-"}</td>
-            <td>
-                <button onclick="verDetalle(${eq.id})">👁</button>
-                <button onclick="editarEquipo(${eq.id})">✏</button>
-                <button onclick="asignarEquipo(${eq.id})">👤</button>
-                <button onclick="reimprimirEtiqueta('${eq.identificador}', '${eq.token_publico}')">🏷</button>
+            <td>${eq.empleado_nombre || "-"}</td>
+            <td class="acciones">
+                <button onclick="verDetalle(${eq.id})" class="btn-icon">👁</button>
+                <button onclick="asignarEquipo(${eq.id})" class="btn-icon">👤</button>
+                <button onclick="reimprimirEtiqueta('${eq.identificador}', '${eq.token_publico}')" class="btn-icon">🏷</button>
             </td>
         `;
 
         tbody.appendChild(tr);
     });
 }
+
+
 
 function reimprimirEtiqueta(identificador, token) {
 
@@ -124,11 +142,7 @@ function renderEstado(estado) {
 }
 
 function verDetalle(id) {
-    location.href = `equipo.html?id=${id}`;
-}
-
-function editarEquipo(id) {
-    alert("Editar equipo ID: " + id);
+    location.href = `inventario/equipo.html?id=${id}`;
 }
 
 function asignarEquipo(id) {
@@ -279,64 +293,115 @@ function confirmarAsignacion() {
 function renderSpecs() {
 
     const tipo = document.getElementById("tipo").value;
+    const icono = document.getElementById("tipoIcono");
     const container = document.getElementById("specsContainer");
-    container.innerHTML = "";
 
+    // 🔹 Cambiar icono
     if (tipo === "Computadora") {
-        container.innerHTML = `
-            <label>Categoría</label>
-            <select id="categoria">
-                <option value="Escritorio">Escritorio</option>
-                <option value="Laptop">Laptop</option>
-                <option value="Servidor">Servidor</option>
-            </select>
-
-            <label>Sistema Operativo</label>
-            <input type="text" id="so" />
-
-            <label>Procesador *</label>
-            <input type="text" id="procesador" />
-
-            <label>RAM *</label>
-            <input type="text" id="ram" />
-
-            <label>Disco</label>
-            <input type="text" id="disco" />
-        `;
+        icono.innerHTML = `<span class="material-icons">computer</span>`;
     }
 
     if (tipo === "Monitor") {
-        container.innerHTML = `
-            <label>Tamaño *</label>
-            <input type="text" id="tamano" />
-
-            <label>Resolución</label>
-            <input type="text" id="resolucion" />
-
-            <label>Tipo de panel</label>
-            <input type="text" id="panel" />
-        `;
+        icono.innerHTML = `<span class="material-icons">desktop_windows</span>`;
     }
 
     if (tipo === "Impresora") {
-        container.innerHTML = `
-            <label>Tecnología *</label>
-            <select id="tecnologia">
-                <option value="Laser">Laser</option>
-                <option value="Inyección">Inyección</option>
-            </select>
-
-            <label>Monocromática</label>
-            <select id="mono">
-                <option value="Sí">Sí</option>
-                <option value="No">No</option>
-            </select>
-
-            <label>Modelo de cartucho</label>
-            <input type="text" id="cartucho" />
-        `;
+        icono.innerHTML = `<span class="material-icons">print</span>`;
     }
+
+    // 🔹 Animación salida
+    container.classList.add("specs-hidden");
+
+    setTimeout(() => {
+
+        let nuevoContenido = "";
+
+        if (tipo === "Computadora") {
+            nuevoContenido = `
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="categoria">
+                        <option value="Escritorio">Escritorio</option>
+                        <option value="Laptop">Laptop</option>
+                        <option value="Servidor">Servidor</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Sistema Operativo</label>
+                    <input type="text" id="so">
+                </div>
+
+                <div class="form-group">
+                    <label>Procesador *</label>
+                    <input type="text" id="procesador">
+                </div>
+
+                <div class="form-group">
+                    <label>RAM *</label>
+                    <input type="text" id="ram">
+                </div>
+
+                <div class="form-group">
+                    <label>Disco</label>
+                    <input type="text" id="disco">
+                </div>
+            `;
+        }
+
+        if (tipo === "Monitor") {
+            nuevoContenido = `
+                <div class="form-group">
+                    <label>Tamaño *</label>
+                    <input type="text" id="tamano">
+                </div>
+
+                <div class="form-group">
+                    <label>Resolución</label>
+                    <input type="text" id="resolucion">
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo de panel</label>
+                    <input type="text" id="panel">
+                </div>
+            `;
+        }
+
+        if (tipo === "Impresora") {
+            nuevoContenido = `
+                <div class="form-group">
+                    <label>Tecnología *</label>
+                    <select id="tecnologia">
+                        <option value="Laser">Laser</option>
+                        <option value="Inyección">Inyección</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Monocromática</label>
+                    <select id="mono">
+                        <option value="Sí">Sí</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Modelo de cartucho</label>
+                    <input type="text" id="cartucho">
+                </div>
+            `;
+        }
+
+        // 🔹 Cambiar contenido
+        container.innerHTML = nuevoContenido;
+
+        // 🔹 Animación entrada
+        container.classList.remove("specs-hidden");
+
+    }, 150);
 }
+
 
 function abrirEtiqueta(identificador, token, posicion = 1) {
 
@@ -429,6 +494,40 @@ function abrirEtiqueta(identificador, token, posicion = 1) {
         </body>
         </html>
     `);
+}
+
+function exportarExcel() {
+
+    const table = document.querySelector("table").cloneNode(true);
+
+    // Eliminar columna Acciones
+    table.querySelectorAll("tr").forEach(row => {
+        row.deleteCell(-1);
+    });
+
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Inventario TI" });
+
+    XLSX.writeFile(wb, "Inventario_TI.xlsx");
+}
+
+
+function exportarPDF() {
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const table = document.querySelector("table").cloneNode(true);
+
+    table.querySelectorAll("tr").forEach(row => {
+        row.deleteCell(-1);
+    });
+
+    doc.autoTable({
+        html: table,
+        styles: { fontSize: 8 }
+    });
+
+    doc.save("Inventario_TI.pdf");
 }
 
 

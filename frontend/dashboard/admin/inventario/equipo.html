@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle Equipo</title>
+  <base href="/ticketssoporteti/frontend/dashboard/admin/">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="inventario/css/equipo.css">
+  <script src="inventario/js/equipo.js" defer></script>
+</head>
+
+<body>
+
+<header class="header">
+  <button onclick="history.back()">← Volver</button>
+  <span id="tituloEquipoHeader"></span>
+</header>
+
+<main class="equipo-container">
+
+    <div class="summary-card">
+    <div>
+        <strong id="resumenTipo"></strong>
+        <small id="resumenAsignado"></small>
+    </div>
+</div>
+
+
+    <div class="equipo-header-card">
+    <div>
+        <h2 id="tituloEquipo"></h2>
+        <div class="estado-wrapper">
+            <select id="estadoSelect" onchange="cambiarEstadoInline()"></select>
+        </div>
+
+    </div>
+
+    <div class="header-actions">
+        <button class="btn-primary" onclick="activarEdicion()">Editar</button>
+        <button class="btn-light" onclick="reimprimirDesdeVista()">Reimprimir etiqueta</button>
+    </div>
+</div>
+
+  <section class="card">
+    <h3>Información General</h3>
+    <div id="infoGeneral"></div>
+  </section>
+
+  <section class="card">
+    <h3>Especificaciones Técnicas</h3>
+    <div id="infoSpecs"></div>
+  </section>
+
+  <section class="card">
+    <h3>Historial</h3>
+    <div id="historial"></div>
+  </section>
+
+</main>
+
+</body>
+</html>

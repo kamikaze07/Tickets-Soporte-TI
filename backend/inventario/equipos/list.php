@@ -20,17 +20,14 @@ try {
             e.marca,
             e.modelo,
             e.estado,
-            e.token_publico,
-            (
-                SELECT nombre_usu
-                FROM usuarios
-                WHERE usuarios.num_emp = a.num_emp
-                LIMIT 1
-            ) AS usuario_nombre
+            CONCAT(emp.nombre, ' ', emp.ap_pat, ' ', emp.ap_mat) AS empleado_nombre,
+            e.token_publico
         FROM inventario_equipos e
         LEFT JOIN inventario_asignaciones a 
             ON e.id = a.equipo_id 
             AND a.estado = 'activo'
+        LEFT JOIN empleados emp
+            ON emp.clave_emp = a.num_emp
         ORDER BY e.id DESC
     ");
 

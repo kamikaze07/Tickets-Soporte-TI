@@ -13,6 +13,10 @@
 
   <script src="js/dashboard.js" defer></script>
   <script src="inventario/js/inventario.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
 </head>
 
 <!-- MODAL ASIGNAR -->
@@ -32,32 +36,57 @@
 <!-- MODAL AGREGAR EQUIPO -->
 <div id="modalEquipo" class="modal">
   <div class="modal-content">
-    <h3>Agregar Equipo</h3>
 
-    <label>Tipo</label>
-    <select id="tipo">
-      <option value="Computadora">Computadora</option>
-      <option value="Monitor">Monitor</option>
-      <option value="Impresora">Impresora</option>
-    </select>
+    <div class="modal-header">
+      <div id="tipoIcono" class="tipo-icono">
+      <span class="material-icons">computer</span>
+      </div>
+      <h3>Agregar Equipo</h3>
+    </div>
 
-    <label>Marca (opcional)</label>
-    <input type="text" id="marca" />
+  <h3>Agregar Equipo</h3>
 
-    <label>Modelo (opcional)</label>
-    <input type="text" id="modelo" />
+  <div class="form-section">
+    <h4>Datos Generales</h4>
 
-    <label>Número de serie (opcional)</label>
-    <input type="text" id="numero_serie" />
+    <div class="form-group">
+      <label>Tipo</label>
+      <select id="tipo">
+        <option value="Computadora">Computadora</option>
+        <option value="Monitor">Monitor</option>
+        <option value="Impresora">Impresora</option>
+      </select>
+    </div>
 
-    <!-- SECCIÓN DINÁMICA -->
-    <div id="specsContainer"></div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Marca (opcional)</label>
+        <input type="text" id="marca">
+      </div>
 
-    <div class="modal-actions">
-      <button id="btnGuardarEquipo" class="btn">Guardar</button>
-      <button id="btnCerrarModal" class="btn cancel">Cancelar</button>
+      <div class="form-group">
+        <label>Modelo (opcional)</label>
+        <input type="text" id="modelo">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Número de serie (opcional)</label>
+      <input type="text" id="numero_serie">
     </div>
   </div>
+
+  <div class="form-section">
+    <h4>Especificaciones</h4>
+    <div id="specsContainer"></div>
+  </div>
+
+  <div class="modal-actions">
+    <button id="btnGuardarEquipo" class="btn">Guardar</button>
+    <button id="btnCerrarModal" class="btn cancel">Cancelar</button>
+  </div>
+</div>
+
 </div>
 
 
@@ -113,15 +142,25 @@
         <button id="btnAgregar" class="btn">+ Agregar Equipo</button>
       </div>
 
-      <div class="inventario-filtros">
-        <select id="filtroEstado">
-          <option value="">Todos los estados</option>
+    <div class="filtros">
+        <select id="filtroTipo">
+            <option value="">Todos los tipos</option>
+            <option value="Computadora">Computadora</option>
+            <option value="Monitor">Monitor</option>
+            <option value="Impresora">Impresora</option>
         </select>
 
-        <select id="filtroTipo">
-          <option value="">Todos los tipos</option>
+        <select id="filtroEstado">
+            <option value="">Todos los estados</option>
+            <option value="Disponible">Disponible</option>
+            <option value="Asignado">Asignado</option>
+            <option value="En reparación">En reparación</option>
+            <option value="Dado de baja">Dado de baja</option>
         </select>
-      </div>
+
+        <button class="btn-light" onclick="exportarExcel()">Exportar Excel</button>
+        <button class="btn-light" onclick="exportarPDF()">Exportar PDF</button>
+    </div>
 
       <table>
         <thead>
