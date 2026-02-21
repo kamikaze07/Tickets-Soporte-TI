@@ -1,5 +1,11 @@
 let equipoAsignarId = null;
 
+let currentPage = 1;
+let currentSort = "id";
+let currentOrder = "DESC";
+let limit = 10;
+let searchTerm = "";
+let searchTimeout = null;
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -29,29 +35,87 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filtroEstado")
         .addEventListener("change", () => cargarEquipos());
 
+    document.getElementById("busquedaGlobal")
+        .addEventListener("input", (e) => {
+
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(() => {
+                searchTerm = e.target.value.trim();
+                currentPage = 1;
+                cargarEquipos();
+            }, 300);
+
+        });
+
+    document.getElementById("selectLimit")
+        .addEventListener("change", (e) => {
+            limit = parseInt(e.target.value);
+            currentPage = 1;
+            cargarEquipos();
+        });
+
 });
 
 function cargarEquipos() {
 
-    fetch('/ticketssoporteti/backend/inventario/equipos/list.php')
-        .then(res => res.json())
-        .then(data => {
+    const filtroTipo = document.getElementById("filtroTipo").value;
+    const filtroEstado = document.getElementById("filtroEstado").value;
 
-            if (data.error) {
-                console.error(data.error);
+    const params = new URLSearchParams({
+        page: currentPage,
+        limit: limit,
+        sort: currentSort,
+        order: currentOrder,
+        tipo: filtroTipo,
+        estado: filtroEstado,
+        search: searchTerm
+    });
+
+    mostrarSkeleton();
+
+    fetch(`/ticketssoporteti/backend/inventario/equipos/list.php?${params}`)
+        .then(res => res.json())
+        .then(response => {
+
+            if (response.error) {
+                console.error(response.error);
                 return;
             }
 
-            renderTabla(data);
+            renderTabla(response.data);
+            renderPaginacion(response.totalPages, response.total);
+            actualizarIndicadoresSort();
 
         })
-        .catch(err => {
-            console.error("Error al cargar equipos:", err);
-        });
+        .catch(err => console.error(err));
+}
+
+function mostrarSkeleton() {
+
+    const tbody = document.getElementById("tablaEquipos");
+    tbody.innerHTML = "";
+
+    for (let i = 0; i < limit; i++) {
+
+        const tr = document.createElement("tr");
+        tr.classList.add("skeleton-row");
+
+        tr.innerHTML = `
+            <td><div class="skeleton"></div></td>
+            <td><div class="skeleton"></div></td>
+            <td><div class="skeleton"></div></td>
+            <td><div class="skeleton"></div></td>
+            <td><div class="skeleton"></div></td>
+            <td><div class="skeleton"></div></td>
+            <td><div class="skeleton"></div></td>
+        `;
+
+        tbody.appendChild(tr);
+    }
 }
 
 function renderTabla(equipos) {
-
     const filtroTipo = document.getElementById("filtroTipo").value;
     const filtroEstado = document.getElementById("filtroEstado").value;
 
@@ -64,6 +128,7 @@ function renderTabla(equipos) {
     });
 
     const tbody = document.getElementById("tablaEquipos");
+    tbody.classList.add("fade-enter");
     tbody.innerHTML = "";
 
     if (equiposFiltrados.length === 0) {
@@ -80,6 +145,13 @@ function renderTabla(equipos) {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
+            <td>
+                <input type="checkbox" class="check-etiqueta" 
+                    value='${JSON.stringify({
+                        identificador: eq.identificador,
+                        token: eq.token_publico
+                    })}'>
+            </td>
             <td>${eq.identificador}</td>
             <td>${eq.tipo}</td>
             <td>${eq.marca || "-"}</td>
@@ -95,9 +167,115 @@ function renderTabla(equipos) {
 
         tbody.appendChild(tr);
     });
+        setTimeout(() => {
+        tbody.classList.add("fade-enter-active");
+        }, 10);
+
+        setTimeout(() => {
+            tbody.classList.remove("fade-enter", "fade-enter-active");
+        }, 300);
 }
 
+function imprimirSeleccionadas() {
 
+    const checks = document.querySelectorAll(".check-etiqueta:checked");
+
+    if (checks.length === 0) {
+        alert("Seleccione al menos un equipo");
+        return;
+    }
+
+    if (checks.length > 8) {
+        alert("Máximo 8 etiquetas por hoja");
+        return;
+    }
+
+    const equipos = [];
+
+    checks.forEach(c => {
+        equipos.push(JSON.parse(c.value));
+    });
+
+    generarHojaEtiquetas(equipos);
+}
+
+function ordenar(columna) {
+
+    if (currentSort === columna) {
+        currentOrder = currentOrder === "ASC" ? "DESC" : "ASC";
+    } else {
+        currentSort = columna;
+        currentOrder = "ASC";
+    }
+
+    currentPage = 1;
+    cargarEquipos();
+}
+
+function renderPaginacion(totalPages, total) {
+
+    const container = document.getElementById("paginacion");
+    container.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // 🔹 Botón Anterior
+    const btnPrev = document.createElement("button");
+    btnPrev.textContent = "«";
+    btnPrev.disabled = currentPage === 1;
+
+    btnPrev.addEventListener("click", () => {
+        if (currentPage > 1) {
+            currentPage--;
+            cargarEquipos();
+        }
+    });
+
+    container.appendChild(btnPrev);
+
+    // 🔹 Botones numéricos
+    for (let i = 1; i <= totalPages; i++) {
+
+        const btn = document.createElement("button");
+        btn.textContent = i;
+
+        if (i === currentPage) {
+            btn.classList.add("active");
+        }
+
+        btn.addEventListener("click", () => {
+            currentPage = i;
+            cargarEquipos();
+        });
+
+        container.appendChild(btn);
+    }
+
+    // 🔹 Botón Siguiente
+    const btnNext = document.createElement("button");
+    btnNext.textContent = "»";
+    btnNext.disabled = currentPage === totalPages;
+
+    btnNext.addEventListener("click", () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            cargarEquipos();
+        }
+    });
+
+    container.appendChild(btnNext);
+
+    // 🔹 Texto informativo
+    const info = document.createElement("div");
+
+    const start = (currentPage - 1) * limit + 1;
+    const end = Math.min(currentPage * limit, total);
+
+    info.className = "paginacion-info";
+    info.textContent = `Mostrando ${start}–${end} de ${total} resultados`;
+
+    container.appendChild(info);
+}
 
 function reimprimirEtiqueta(identificador, token) {
 
@@ -107,10 +285,11 @@ function reimprimirEtiqueta(identificador, token) {
 1  |  2
 3  |  4
 5  |  6
+7  |  8
 
-Escriba un número del 1 al 6:`);
+Escriba un número del 1 al 8:`);
 
-    if (!posicion || posicion < 1 || posicion > 6) {
+    if (!posicion || posicion < 1 || posicion > 8) {
         alert("Posición inválida");
         return;
     }
@@ -118,6 +297,88 @@ Escriba un número del 1 al 6:`);
     abrirEtiqueta(identificador, token, parseInt(posicion));
 }
 
+function generarHojaEtiquetas(equipos) {
+
+    const ventana = window.open("", "_blank");
+    const logoPath = `/ticketssoporteti/frontend/login/assets/logo-forsis.png`;
+
+    const posiciones = [
+        { top: "1cm", left: "1cm" },
+        { top: "1cm", left: "11cm" },
+
+        { top: "7.5cm", left: "1cm" },
+        { top: "7.5cm", left: "11cm" },
+
+        { top: "14cm", left: "1cm" },
+        { top: "14cm", left: "11cm" },
+
+        { top: "20.5cm", left: "1cm" },
+        { top: "20.5cm", left: "11cm" }
+    ];
+
+    let etiquetasHTML = "";
+
+    equipos.forEach((eq, index) => {
+
+        const coords = posiciones[index];
+        const urlPublica = `http://${window.location.hostname}/ticketssoporteti/backend/public/equipo.php?token=${eq.token}`;
+
+        etiquetasHTML += `
+            <div class="etiqueta" 
+                style="top:${coords.top}; left:${coords.left}">
+                <img src="${logoPath}" class="logo">
+                <div class="id">${eq.identificador}</div>
+                <canvas id="qr${index}"></canvas>
+                <div class="footer">Inventario TI</div>
+            </div>
+        `;
+    });
+
+    ventana.document.write(`
+        <html>
+        <head>
+            <title>Etiquetas</title>
+            <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"><\/script>
+            <style>
+                @page { size: Letter; margin: 0; }
+                body {
+                    margin: 0;
+                    position: relative;
+                    width: 21.6cm;
+                    height: 27.9cm;
+                    font-family: Arial;
+                }
+                .etiqueta {
+                    position: absolute;
+                    width: 9cm;
+                    height: 6cm;
+                    border: 2px solid #000;
+                    padding: 10px;
+                    box-sizing: border-box;
+                    text-align: center;
+                }
+                .logo { height: 40px; }
+                .id { font-weight: bold; margin: 5px 0; }
+                .footer { font-size: 10px; margin-top: 5px; }
+            </style>
+        </head>
+        <body>
+            ${etiquetasHTML}
+            <script>
+                ${equipos.map((eq, i) => `
+                    QRCode.toCanvas(
+                        document.getElementById("qr${i}"),
+                        "http://${window.location.hostname}/ticketssoporteti/backend/public/equipo.php?token=${eq.token}",
+                        { width: 110 }
+                    );
+                `).join("")}
+
+                setTimeout(() => window.print(), 600);
+            <\/script>
+        </body>
+        </html>
+    `);
+}
 
 function renderEstado(estado) {
 
@@ -234,7 +495,6 @@ function crearEquipo() {
         console.error("Error:", err);
     });
 }
-
 
 function limpiarFormulario() {
     document.getElementById("marca").value = "";
@@ -402,6 +662,21 @@ function renderSpecs() {
     }, 150);
 }
 
+function actualizarIndicadoresSort() {
+
+    document.querySelectorAll("th[data-col]").forEach(th => {
+
+        const span = th.querySelector(".sort-indicator");
+        const col = th.getAttribute("data-col");
+
+        if (col === currentSort) {
+            span.textContent = currentOrder === "ASC" ? " ↑" : " ↓";
+        } else {
+            span.textContent = "";
+        }
+
+    });
+}
 
 function abrirEtiqueta(identificador, token, posicion = 1) {
 
@@ -413,10 +688,15 @@ function abrirEtiqueta(identificador, token, posicion = 1) {
     const posiciones = {
         1: { top: "1cm", left: "1cm" },
         2: { top: "1cm", left: "11cm" },
-        3: { top: "10cm", left: "1cm" },
-        4: { top: "10cm", left: "11cm" },
-        5: { top: "19cm", left: "1cm" },
-        6: { top: "19cm", left: "11cm" }
+
+        3: { top: "7.5cm", left: "1cm" },
+        4: { top: "7.5cm", left: "11cm" },
+
+        5: { top: "14cm", left: "1cm" },
+        6: { top: "14cm", left: "11cm" },
+
+        7: { top: "20.5cm", left: "1cm" },
+        8: { top: "20.5cm", left: "11cm" }
     };
 
     const coords = posiciones[posicion];
@@ -496,20 +776,178 @@ function abrirEtiqueta(identificador, token, posicion = 1) {
     `);
 }
 
-function exportarExcel() {
+async function exportarExcel() {
 
-    const table = document.querySelector("table").cloneNode(true);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Inventario");
 
-    // Eliminar columna Acciones
-    table.querySelectorAll("tr").forEach(row => {
-        row.deleteCell(-1);
+    const fechaFormato = "18/10/24";
+    const revision = "0";
+    const codigo = "FMF-FOR-SIS-003";
+    const elaboro = "Cesar Luis Soto Gonzalez";
+
+    // ================================
+    // LOGO
+    // ================================
+    const response = await fetch("/ticketssoporteti/frontend/login/assets/logo-forsis.png");
+    const blob = await response.blob();
+    const buffer = await blob.arrayBuffer();
+
+    const imageId = workbook.addImage({
+        buffer: buffer,
+        extension: "png",
     });
 
-    const wb = XLSX.utils.table_to_book(table, { sheet: "Inventario TI" });
+    worksheet.addImage(imageId, {
+        tl: { col: 0, row: 0 },
+        ext: { width: 110, height: 110 }
+    });
 
-    XLSX.writeFile(wb, "Inventario_TI.xlsx");
+    // ================================
+    // TÍTULO
+    // ================================
+    worksheet.mergeCells("A5:F5");
+    worksheet.getCell("A5").value = "INVENTARIO DE EQUIPOS TI";
+    worksheet.getCell("A5").font = { size: 14, bold: true };
+    worksheet.getCell("A5").alignment = { horizontal: "center" };
+
+    // ================================
+    // BLOQUE SUPERIOR CORREGIDO
+    // ================================
+
+    // FECHA - PAG - REVISION
+    worksheet.getCell("A7").value = "FECHA";
+    worksheet.getCell("B7").value = fechaFormato;
+
+    worksheet.getCell("C7").value = "PAG.";
+    worksheet.getCell("D7").value = "1 de 1";
+
+    worksheet.getCell("E7").value = "REVISION";
+    worksheet.getCell("F7").value = revision;
+
+    // CODIGO (combinar columnas B-F)
+    worksheet.getCell("A8").value = "CODIGO";
+    worksheet.mergeCells("B8:F8");
+    worksheet.getCell("B8").value = codigo;
+
+    // ELABORÓ (combinar columnas B-F)
+    worksheet.getCell("A9").value = "Elaboró:";
+    worksheet.mergeCells("B9:F9");
+    worksheet.getCell("B9").value = elaboro;
+
+    // Estilo bloque superior (bordes sin fondo)
+    for (let row = 7; row <= 9; row++) {
+        for (let col = 1; col <= 6; col++) {
+            const cell = worksheet.getRow(row).getCell(col);
+
+            cell.border = {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" }
+            };
+
+            if (col % 2 !== 0) {
+                cell.font = { bold: true };
+            }
+
+            cell.alignment = { vertical: "middle" };
+        }
+    }
+
+    // ================================
+    // TABLA
+    // ================================
+    const startRow = 11;
+
+    const headers = [
+        "Identificador",
+        "Tipo",
+        "Marca",
+        "Modelo",
+        "Estado",
+        "Asignado a"
+    ];
+
+    const headerRow = worksheet.insertRow(startRow, headers);
+
+    headerRow.eachCell(cell => {
+        cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+        cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "1F4E78" }
+        };
+        cell.alignment = { horizontal: "center" };
+        cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" }
+        };
+    });
+
+    // Datos visibles con zebra striping
+    let rowIndex = startRow + 1;
+    let zebra = false;
+
+    document.querySelectorAll("#tablaEquipos tr").forEach(tr => {
+
+        const cells = tr.querySelectorAll("td");
+
+        if (cells.length > 0) {
+
+            const row = worksheet.insertRow(rowIndex, [
+                cells[1].innerText,
+                cells[2].innerText,
+                cells[3].innerText,
+                cells[4].innerText,
+                cells[5].innerText,
+                cells[6].innerText
+            ]);
+
+            row.eachCell(cell => {
+
+                cell.border = {
+                    top: { style: "thin" },
+                    left: { style: "thin" },
+                    bottom: { style: "thin" },
+                    right: { style: "thin" }
+                };
+
+                if (zebra) {
+                    cell.fill = {
+                        type: "pattern",
+                        pattern: "solid",
+                        fgColor: { argb: "F2F2F2" }
+                    };
+                }
+            });
+
+            zebra = !zebra;
+            rowIndex++;
+        }
+    });
+
+    // Autofiltro
+    worksheet.autoFilter = {
+        from: { row: startRow, column: 1 },
+        to: { row: rowIndex - 1, column: 6 }
+    };
+
+    // Ancho columnas
+    worksheet.columns = [
+        { width: 22 },
+        { width: 15 },
+        { width: 18 },
+        { width: 18 },
+        { width: 15 },
+        { width: 28 }
+    ];
+
+    const bufferFinal = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([bufferFinal]), "Inventario_Institucional.xlsx");
 }
-
 
 function exportarPDF() {
 
@@ -529,5 +967,3 @@ function exportarPDF() {
 
     doc.save("Inventario_TI.pdf");
 }
-
-

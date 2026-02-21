@@ -13,7 +13,8 @@
 
   <script src="js/dashboard.js" defer></script>
   <script src="inventario/js/inventario.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
@@ -143,6 +144,17 @@
       </div>
 
     <div class="filtros">
+      <select id="selectLimit" class="select-limit">
+        <option value="10">Mostrar 10</option>
+        <option value="25">Mostrar 25</option>
+        <option value="50">Mostrar 50</option>
+      </select>
+        <input 
+          type="text" 
+          id="busquedaGlobal" 
+          placeholder="Buscar equipo..."
+          class="input-busqueda"
+        />
         <select id="filtroTipo">
             <option value="">Todos los tipos</option>
             <option value="Computadora">Computadora</option>
@@ -158,24 +170,50 @@
             <option value="Dado de baja">Dado de baja</option>
         </select>
 
-        <button class="btn-light" onclick="exportarExcel()">Exportar Excel</button>
-        <button class="btn-light" onclick="exportarPDF()">Exportar PDF</button>
+        <button class="btn-export excel" onclick="exportarExcel()">
+          <span class="material-icons">grid_on</span>
+          Excel
+        </button>
+
+        <button class="btn-export pdf" onclick="exportarPDF()">
+          <span class="material-icons">picture_as_pdf</span>
+          PDF
+        </button>
+
+        <button class="btn" onclick="imprimirSeleccionadas()">
+          🏷 Imprimir etiquetas
+        </button>
     </div>
 
       <table>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Tipo</th>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th>Estado</th>
+            <th class="col-check"></th>
+            <th onclick="ordenar('identificador')" data-col="identificador">
+              ID <span class="sort-indicator"></span>
+            </th>
+            <th onclick="ordenar('tipo')" data-col="tipo">
+              Tipo <span class="sort-indicator"></span>
+            </th>
+
+            <th onclick="ordenar('marca')" data-col="marca">
+              Marca <span class="sort-indicator"></span>
+            </th>
+
+            <th onclick="ordenar('modelo')" data-col="modelo">
+              Modelo <span class="sort-indicator"></span>
+            </th>
+
+            <th onclick="ordenar('estado')" data-col="estado">
+              Estado <span class="sort-indicator"></span>
+            </th>
             <th>Asignado a</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody id="tablaEquipos"></tbody>
       </table>
+      <div id="paginacion" class="paginacion"></div>
     </section>
 
   </main>
