@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
 
 A[Inicio - Admin autenticado] --> B[Accede a Inventario TI]
@@ -26,3 +27,4 @@ Q --> R[Descargar archivo]
 
 D -->|Exportar PDF| S[Generar PDF]
 S --> T[Descargar archivo]
+```

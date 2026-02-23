@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
 
 A[Click Exportar Excel] --> B[Crear workbook ExcelJS]
@@ -10,3 +11,4 @@ F --> G[Insertar filas con zebra]
 G --> H[Aplicar autofiltro]
 H --> I[Generar buffer]
 I --> J[Descargar archivo XLSX]
+```

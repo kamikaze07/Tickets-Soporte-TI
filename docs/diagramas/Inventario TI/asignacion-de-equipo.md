@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
 
 A[Click botón Asignar] --> B[Fetch usuarios disponibles]
@@ -10,3 +11,4 @@ E --> F[POST asignar.php]
 F --> G[Backend valida sesión]
 G --> H[Registrar asignación activa]
 H --> I[Actualizar tabla]
+```

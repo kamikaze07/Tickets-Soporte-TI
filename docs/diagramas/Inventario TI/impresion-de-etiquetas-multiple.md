@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
 
 A[Usuario selecciona checkboxes] --> B{¿Seleccionó al menos 1?}
@@ -13,3 +14,4 @@ G --> H[Insertar estructura HTML]
 H --> I[Calcular posiciones 2x4]
 I --> J[Generar QR por equipo]
 J --> K[window.print()]
+```

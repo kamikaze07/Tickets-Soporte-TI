@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
 
 A[Admin abre modal Agregar Equipo] --> B[Selecciona tipo]
@@ -22,3 +23,4 @@ L --> M[Generar identificador único]
 M --> N[Generar token público]
 N --> O[Respuesta JSON OK]
 O --> P[Actualizar tabla]
+```
