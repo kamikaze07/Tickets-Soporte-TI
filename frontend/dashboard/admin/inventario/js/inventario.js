@@ -776,6 +776,33 @@ function abrirEtiqueta(identificador, token, posicion = 1) {
     `);
 }
 
+function obtenerDescripcionFiltros() {
+
+  const tipo = document.getElementById("filtroTipo")?.value;
+  const estado = document.getElementById("filtroEstado")?.value;
+  const search = document.getElementById("searchInput")?.value?.trim();
+
+  let partes = [];
+
+  if (estado && estado !== "") {
+    partes.push(estado);
+  }
+
+  if (tipo && tipo !== "") {
+    partes.push(`Tipo: ${tipo}`);
+  }
+
+  if (search) {
+    partes.push(`Búsqueda: ${search}`);
+  }
+
+  if (partes.length === 0) {
+    return "Inventario de Equipos TI";
+  }
+
+  return "Inventario de Equipos TI | Filtros: " + partes.join(" | ");
+}
+
 async function exportarExcel() {
 
     const workbook = new ExcelJS.Workbook();
@@ -949,21 +976,190 @@ async function exportarExcel() {
     saveAs(new Blob([bufferFinal]), "Inventario_Institucional.xlsx");
 }
 
+
 function exportarPDF() {
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+  const { jsPDF } = window.jspdf;
 
-    const table = document.querySelector("table").cloneNode(true);
+  const doc = new jsPDF({
+    orientation: 'landscape',
+    unit: 'mm',
+    format: 'letter'
+  });
 
-    table.querySelectorAll("tr").forEach(row => {
-        row.deleteCell(-1);
-    });
+  const margin = 12;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  const logo = new Image();
+  logo.src = '/ticketssoporteti/frontend/login/assets/logo-forsis.png';
+
+  logo.onload = function () {
+
+    /* =========================================
+       2️⃣ HEADER INSTITUCIONAL
+    ========================================== */
 
     doc.autoTable({
-        html: table,
-        styles: { fontSize: 8 }
+      startY: 10,
+      margin: { left: margin, right: margin },
+      body: [
+        [
+          { content: '', rowSpan: 6, styles: { cellWidth: 30 } },
+          { content: 'INVENTARIO DE EQUIPOS TI', colSpan: 4, styles: { halign: 'center', fontStyle: 'bold', fontSize: 14 } }
+        ],
+        [
+          { content: 'FLETES Y MATERIALES FORSIS, S.A. DE C.V.', colSpan: 4, styles: { halign: 'center', textColor: [220,38,38], fontStyle: 'bold' } }
+        ],
+        [
+          { content: 'FECHA', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'PAG.', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'REVISION', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'CÓDIGO', styles: { halign: 'center', fontStyle: 'bold' } }
+        ],
+        [
+          { content: '18/10/24', styles: { halign: 'center' } },
+          { content: '1 de 1', styles: { halign: 'center' } },
+          { content: '0', styles: { halign: 'center' } },
+          { content: 'FMF-FOR-SIS-003', styles: { halign: 'center' } }
+        ],
+        [
+          { content: 'Elaboró:', styles: { halign: 'right', fontStyle: 'bold' } },
+          { content: 'Cesar Luis Soto Gonzalez', colSpan: 3 }
+        ]
+      ],
+      theme: 'grid',
+      styles: { fontSize: 8, cellPadding: 2 }
     });
 
-    doc.save("Inventario_TI.pdf");
+    doc.addImage(logo, 'PNG', margin + 3, 13, 24, 24);
+
+    /* =========================================
+       3️⃣ TABLA DE DATOS
+    ========================================== */
+
+    const rows = [];
+
+    document.querySelectorAll("#tablaEquipos tr").forEach(tr => {
+      const cells = tr.querySelectorAll("td");
+      if (cells.length > 0) {
+        rows.push([
+          cells[1].innerText,
+          cells[2].innerText,
+          cells[3].innerText,
+          cells[4].innerText,
+          cells[5].innerText,
+          cells[6].innerText
+        ]);
+      }
+    });
+
+    const totalRegistros = rows.length;
+
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 6,
+      margin: { left: margin, right: margin, bottom: 22 }, // 🔥 RESERVA FOOTER
+      head: [[
+        'Identificador',
+        'Tipo',
+        'Marca',
+        'Modelo',
+        'Estado',
+        'Asignado a'
+      ]],
+      body: rows,
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        cellPadding: 3,
+        lineColor: [200,200,200],
+        lineWidth: 0.2
+      },
+      headStyles: {
+        fillColor: [0,0,0],
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [245,245,245]
+      }
+    });
+
+    const totalPages1 = doc.internal.getNumberOfPages();
+
+for (let i = 1; i <= totalPages1; i++) {
+
+  doc.setPage(i);
+
+  doc.setGState(new doc.GState({ opacity: 0.05 }));
+
+  const watermarkSize = 130;
+
+  doc.addImage(
+    logo,
+    'PNG',
+    (pageWidth - watermarkSize) / 2,
+    (pageHeight - watermarkSize) / 2,
+    watermarkSize,
+    watermarkSize
+  );
+
+  doc.setGState(new doc.GState({ opacity: 1 }));
+}
+
+    /* =========================================
+       4️⃣ FOOTER ELEGANTE (SIN INVADIR)
+    ========================================== */
+
+    const totalPages = doc.internal.getNumberOfPages();
+
+    for (let i = 1; i <= totalPages; i++) {
+
+      doc.setPage(i);
+
+      doc.setDrawColor(200);
+      doc.setLineWidth(0.3);
+      doc.line(margin, pageHeight - 18, pageWidth - margin, pageHeight - 18);
+
+      doc.setFontSize(8);
+      doc.setTextColor(80);
+
+      const now = new Date();
+      const fechaGeneracion =
+        now.toLocaleDateString() + " " +
+        now.toLocaleTimeString();
+
+      doc.text(
+        `Generado: ${fechaGeneracion}`,
+        margin,
+        pageHeight - 10
+      );
+
+      doc.setFont(undefined, 'bold');
+
+    const descripcionFiltros = obtenerDescripcionFiltros();
+
+    doc.setFont(undefined, 'bold');
+
+    doc.text(
+    `${descripcionFiltros} | Registros: ${totalRegistros}`,
+    pageWidth / 2,
+    pageHeight - 10,
+    { align: 'center', maxWidth: pageWidth - 60 }
+    );
+
+    doc.setFont(undefined, 'normal');
+
+      doc.setFont(undefined, 'normal');
+
+      doc.text(
+        `Página ${i} de ${totalPages}`,
+        pageWidth - margin,
+        pageHeight - 10,
+        { align: 'right' }
+      );
+    }
+
+    doc.save('Inventario_TI.pdf');
+  };
 }

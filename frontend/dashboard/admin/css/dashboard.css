@@ -83,6 +83,32 @@ body {
 }
 
 /* =========================
+   SIDEBAR COLAPSADO PRO
+========================= */
+
+.sidebar.collapsed .sidebar-menu li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Ocultar texto cuando esté colapsado */
+.sidebar.collapsed .sidebar-menu li span:not(.material-icons) {
+  display: none;
+}
+
+/* Centrar iconos */
+.sidebar.collapsed .sidebar-menu li .material-icons {
+  margin: 0;
+  font-size: 22px;
+}
+
+/* Ajustar padding */
+.sidebar.collapsed .sidebar-menu li {
+  padding: 14px 0;
+}
+
+/* =========================
    CONTENT
 ========================= */
 .content {
@@ -748,4 +774,30 @@ tbody tr:hover {
     margin-top: 6px;
   }
 
+}
+
+/* =========================
+   SIDEBAR COLAPSADO FIX REAL
+========================= */
+
+/* Mantener flex alineado */
+.sidebar-menu li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Cuando esté colapsado */
+.sidebar.collapsed .sidebar-menu li {
+  justify-content: center;
+}
+
+/* Ocultar el texto real */
+.sidebar.collapsed .sidebar-menu li {
+  font-size: 0;
+}
+
+/* Restaurar tamaño del icono */
+.sidebar.collapsed .sidebar-menu li .material-icons {
+  font-size: 22px;
 }
