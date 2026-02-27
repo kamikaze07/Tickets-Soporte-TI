@@ -1,112 +1,62 @@
-# Tickets de Soporte TI
+# 🖥 Sistema Integral de Gestión TI
 
-Sistema web interno para la creación, gestión y resolución de tickets de soporte de TI.
+![PHP](https://img.shields.io/badge/PHP-8%2B-777BB4?logo=php&logoColor=white)
+![MariaDB](https://img.shields.io/badge/MariaDB-10%2B-003545?logo=mariadb&logoColor=white)
+![WebSocket](https://img.shields.io/badge/WebSocket-RealTime-010101?logo=socketdotio&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)
+![Apache](https://img.shields.io/badge/Apache-Compatible-D22128?logo=apache&logoColor=white)
 
-Este proyecto está diseñado para integrarse con infraestructura existente, priorizando simplicidad, mantenibilidad y bajo consumo de recursos.
+Sistema web interno para la gestión integral del área de TI.
 
----
+Incluye módulos de:
 
-## 🎯 Objetivo
+-   🎫 Tickets
+-   💻 Inventario
+-   🛠 Mantenimientos
+-   🧾 Responsivas (PDF + Firma Digital)
+-   🏷 Etiquetas con QR
+-   🔔 Comunicación en Tiempo Real
 
-Centralizar las solicitudes de soporte técnico de la organización mediante un sistema web que permita:
+------------------------------------------------------------------------
 
-- Crear tickets de soporte de TI
-- Dar seguimiento a su estado
-- Asignar y resolver tickets por personal autorizado
-- Mantener un historial completo de solicitudes
+# 🧠 Arquitectura General
 
----
+``` mermaid
+flowchart TD
+    A[Frontend HTML CSS JS] --> B[API PHP Backend]
+    B --> C[MariaDB]
+    B --> D[WebSocket Server]
+    D --> A
+```
 
-## 🧩 Alcance del Proyecto
+------------------------------------------------------------------------
 
-### Incluye
-- Autenticación contra base de datos existente **SicrePR**
-- Portal de usuarios para creación y seguimiento de tickets
-- Portal de soporte para atención y resolución
-- Control de roles por nivel de usuario
-- Historial y estados de tickets
+# 📦 Módulos
 
-### No incluye
-- Registro de usuarios (solo lectura desde SicrePR)
-- Dependencias innecesarias o frameworks pesados
-- Node.js o servicios externos
+-   [🎫 Tickets](./README-TICKETS.md)
+-   [💻 Inventario](./README-INVENTARIO.md)
+-   [🛠 Mantenimientos](./README-MANTENIMIENTOS.md)
+-   [🧾 Responsivas](./README-RESPONSIVAS.md)
 
----
+------------------------------------------------------------------------
 
-## 🏗️ Stack Tecnológico
+# 🔐 Seguridad
 
-### Backend
-- **Lenguaje:** PHP
-- **Arquitectura:** API interna (PHP estructurado)
-- **Servidor Web:** Apache o Nginx
-- **Sesiones:** PHP Sessions
-- **Autenticación:** Validación directa contra tabla de usuarios de SicrePR
-- **Roles:**
-  - Usuario
-  - Super Usuario (personal de soporte)
+-   Validación de sesión en cada endpoint
+-   Control de roles
+-   Autenticación contra SicrePR
+-   Validación backend obligatoria
 
-> ❌ No se utiliza Node.js  
-> ❌ No se utilizan frameworks JavaScript del lado del servidor  
+------------------------------------------------------------------------
 
----
+# 🚀 Instalación
 
-### Frontend
-- HTML
-- CSS
-- JavaScript (Vanilla)
+1.  Configurar Apache/Nginx
+2.  Configurar conexión a base de datos
+3.  Ejecutar esquemas SQL
+4.  Configurar variables en /infra/env
+5.  Iniciar servidor WebSocket
 
-Sin frameworks JS.  
-La prioridad es compatibilidad, simplicidad y fácil mantenimiento.
+------------------------------------------------------------------------
 
----
-
-### Base de Datos
-- **Motor:** MariaDB
-- **Usuarios:** Consumidos desde base de datos existente **SicrePR**
-- **Tickets:** Tablas propias del proyecto
-- **Relación:** Usuarios ↔ Tickets por identificador interno
-
----
-
-## 🔐 Seguridad
-
-- Autenticación mediante credenciales existentes
-- Manejo de sesiones del lado del servidor
-- Control de acceso por nivel de usuario
-- Validación de permisos en cada acción sensible
-
----
-
-## 📁 Estructura del Proyecto
-
-```text
-tickets-soporte-ti/
-├── docs/                 # Documentación técnica
-│   ├── arquitectura/
-│   ├── diagramas/
-│   └── decisiones-tecnicas.md
-│
-├── infra/                # Infraestructura y configuración
-│   ├── apache/
-│   ├── nginx/
-│   ├── php/
-│   └── env/
-│
-├── backend/              # Lógica del sistema (PHP)
-│   ├── README.md
-│   └── src/
-│
-├── frontend/             # Interfaz de usuario
-│   ├── README.md
-│   └── src/
-│
-├── database/             # Esquemas y notas de BD
-│   ├── README.md
-│   └── schemas/
-│
-├── scripts/              # Scripts de mantenimiento
-│   └── mantenimiento/
-│
-├── .gitignore
-├── README.md
-└── workspace.code-workspace
+📅 Última actualización: 2026-02-27
