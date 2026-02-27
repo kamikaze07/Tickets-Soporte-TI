@@ -42,9 +42,9 @@
   Inventario TI
 </li>
 
-<li>
-  <span class="material-icons">group</span>
-  Usuarios
+<li onclick="location.href='mantenimientos/index.html'">
+  <span class="material-icons">build</span>
+  Mantenimientos
 </li>
 
 <li id="btnLogout" class="logout">
@@ -127,6 +127,26 @@
 </div>
 
 <div class="sidebar-overlay"></div>
+
+<!-- MODAL RESPONSIVA -->
+<div id="modalResponsiva" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Generar Responsiva</h3>
+
+    <p><strong>Firma del Usuario</strong></p>
+    <canvas id="firmaUsuario" width="400" height="150" style="border:1px solid #ccc;"></canvas>
+    <button class="btn-light" onclick="padUsuario.clear()">Limpiar</button>
+
+    <p style="margin-top:15px;"><strong>Firma Sistemas</strong></p>
+    <canvas id="firmaAdmin" width="400" height="150" style="border:1px solid #ccc;"></canvas>
+    <button class="btn-light" onclick="padAdmin.clear()">Limpiar</button>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="guardarResponsiva()">Confirmar</button>
+      <button class="btn cancel" onclick="cerrarModalResponsiva()">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mantenimientos TI | Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <base href="/ticketssoporteti/frontend/dashboard/admin/">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="mantenimientos/css/mantenimientos.css">
+
+  <!-- FullCalendar CDN -->
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+  <script src="js/dashboard.js" defer></script>
+  <script src="mantenimientos/js/mantenimientos.js" defer></script>
+</head>
+
+<body>
+
+<header class="header">
+  <button id="btnMenu" class="menu-btn">☰</button>
+  <span class="header-title">Mantenimientos TI</span>
+  <span class="header-user">SUPER USUARIO</span>
+</header>
+
+<div id="topLoader"></div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebarNav" class="sidebar">
+    <ul class="sidebar-menu">
+
+      <li onclick="location.href='../admin'">
+        <span class="material-icons">dashboard</span>
+        Dashboard
+      </li>
+
+      <li onclick="location.href='../admin/tickets.html'">
+        <span class="material-icons">confirmation_number</span>
+        Tickets
+      </li>
+
+      <li onclick="location.href='../admin/inventario/index.html'">
+        <span class="material-icons">inventory_2</span>
+        Inventario TI
+      </li>
+
+      <li class="active">
+        <span class="material-icons">build</span>
+        Mantenimientos
+      </li>
+
+      <li id="btnLogout" class="logout">
+        <span class="material-icons">logout</span>
+        Cerrar sesión
+      </li>
+
+    </ul>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- SWITCH VISTA -->
+    <section class="mantenimientos-header">
+      <div class="vista-switch">
+        <button id="btnVistaAnual" class="btn active">Vista Año</button>
+        <button id="btnVistaMensual" class="btn">Vista Mes</button>
+      </div>
+    </section>
+
+    <!-- =========================
+         VISTA ANUAL
+    ========================== -->
+    <section id="vistaAnual" class="vista-anual">
+      <div id="gridMeses" class="grid-meses">
+        <!-- Se renderiza dinámicamente -->
+      </div>
+    </section>
+
+    <!-- =========================
+         VISTA MENSUAL
+    ========================== -->
+    <section id="vistaMensual" class="vista-mensual hidden">
+
+      <div class="vista-mensual-layout">
+
+        <!-- MINI CALENDARIO -->
+        <aside class="mini-calendar">
+          <div id="miniCalendar"></div>
+        </aside>
+
+        <!-- CALENDARIO PRINCIPAL -->
+        <div class="calendar-main">
+          <div id="calendar"></div>
+        </div>
+
+      </div>
+
+      <!-- TABLA DEL MES -->
+      <section class="table-section">
+        <h3>Mantenimientos del mes</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Equipo</th>
+              <th>Tipo</th>
+              <th>Programada</th>
+              <th>Realizada</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaMantenimientos"></tbody>
+        </table>
+
+      </section>
+
+    </section>
+
+  </main>
+</div>
+
+<div class="sidebar-overlay"></div>
+
+<!-- =========================
+     MODAL DÍA
+========================= -->
+<div id="modalDia" class="modal">
+  <div class="modal-content">
+
+    <h3 id="modalFechaTitulo"></h3>
+
+    <div id="listaMantenimientosDia"></div>
+
+    <div class="modal-actions">
+      <button id="btnAsignarPreventivo" class="btn">
+        + Asignar Preventivo
+      </button>
+      <button id="btnCerrarModalDia" class="btn cancel">
+        Cerrar
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =========================
+     MODAL ASIGNAR PREVENTIVO
+========================= -->
+<div id="modalAsignar" class="modal">
+  <div class="modal-content">
+
+    <h3>Asignar Mantenimiento Preventivo</h3>
+
+    <div style="margin-bottom:15px;">
+      <label>Equipo</label>
+      <select id="selectEquipo" style="width:100%; padding:8px; margin-top:6px;"></select>
+    </div>
+
+    <p><strong>Fecha:</strong> <span id="fechaSeleccionada"></span></p>
+
+    <div class="modal-actions">
+      <button id="btnGuardarPreventivo" class="btn">Guardar</button>
+      <button id="btnCancelarAsignar" class="btn cancel">Cancelar</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =========================
+     MODAL CIERRE MANTENIMIENTO
+========================= -->
+<div id="modalCerrar" class="modal">
+  <div class="modal-content modal-lg">
+
+    <h3>Cerrar Mantenimiento</h3>
+
+    <div class="form-group">
+      <label>Fotos de evidencia (2 a 3)</label>
+      <input type="file" id="inputFotos" accept="image/*" multiple>
+      <div id="previewFotos" class="preview-fotos"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Firma del técnico</label>
+      <canvas id="canvasFirma"></canvas>
+      <button type="button" id="btnLimpiarFirma" class="btn small">
+        Limpiar Firma
+      </button>
+    </div>
+
+    <div class="modal-actions">
+      <button id="btnCancelarCerrar" class="btn cancel">
+        Cancelar
+      </button>
+      <button id="btnConfirmarCerrar" class="btn" disabled>
+        Confirmar y Generar PDF
+      </button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

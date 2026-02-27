@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <base href="/ticketssoporteti/frontend/dashboard/admin/">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <link rel="stylesheet" href="css/dashboard.css">
   <script src="js/tickets.js" defer></script>
@@ -23,11 +24,31 @@
   <!-- SIDEBAR -->
   <nav id="sidebarNav" class="sidebar">
     <ul class="sidebar-menu">
-      <li onclick="location.href='index.html'">📊 Dashboard</li>
-      <li class="active">🎫 Tickets</li>
-      <li>👥 Usuarios</li>
-      <hr>
-      <li id="btnLogout" class="logout">🚪 Cerrar sesión</li>
+    <li onclick="location.href='index.html'">
+      <span class="material-icons">dashboard</span>
+      Dashboard
+    </li>
+
+    <li class="active">
+      <span class="material-icons">confirmation_number</span>
+      Tickets
+    </li>
+
+    <li onclick="location.href='inventario/index.html'">
+      <span class="material-icons">inventory_2</span>
+      Inventario TI
+    </li>
+
+    <li onclick="location.href='mantenimientos/index.html'">
+      <span class="material-icons">build</span>
+      Mantenimientos
+    </li>
+
+    <li id="btnLogout" class="logout">
+      <span class="material-icons">logout</span>
+      Cerrar sesión
+    </li>
+
     </ul>
   </nav>
 

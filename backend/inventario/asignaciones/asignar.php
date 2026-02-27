@@ -25,13 +25,28 @@ try {
 
     $pdo->beginTransaction();
 
+    // 🔎 Obtener tipo del equipo
+    $stmtTipo = $pdo->prepare("
+        SELECT tipo 
+        FROM inventario_equipos 
+        WHERE id = :id
+    ");
+    $stmtTipo->execute([':id' => $equipo_id]);
+    $equipo = $stmtTipo->fetch(PDO::FETCH_ASSOC);
+
+    if (!$equipo) {
+        throw new Exception("Equipo no encontrado");
+    }
+
+    $tipo_equipo = $equipo['tipo'];
+
     // 🔎 Verificar si ya está asignado
     $stmtCheck = $pdo->prepare("
-        SELECT id FROM inventario_asignaciones
+        SELECT id 
+        FROM inventario_asignaciones
         WHERE equipo_id = :equipo_id
         AND estado = 'activo'
     ");
-
     $stmtCheck->execute([':equipo_id' => $equipo_id]);
 
     if ($stmtCheck->fetch()) {
@@ -76,7 +91,10 @@ try {
 
     $pdo->commit();
 
-    echo json_encode(['success' => true]);
+    echo json_encode([
+        "ok" => true,
+        "tipo" => $tipo_equipo
+    ]);
 
 } catch (Exception $e) {
 

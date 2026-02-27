@@ -22,6 +22,9 @@ if (!$id || !$estado) {
 
 try {
 
+    $pdo->beginTransaction();
+
+    // 🔹 Actualizar estado del equipo
     $stmt = $pdo->prepare("
         UPDATE inventario_equipos
         SET estado = :estado
@@ -33,8 +36,36 @@ try {
         ':id' => $id
     ]);
 
+    // 🔹 Si pasa a Disponible → cerrar asignación activa
+    if ($estado === 'Disponible') {
+
+        $stmtCerrar = $pdo->prepare("
+            UPDATE inventario_asignaciones
+            SET estado = 'cerrado'
+            WHERE equipo_id = :id
+            AND estado = 'activo'
+        ");
+
+        $stmtCerrar->execute([
+            ':id' => $id
+        ]);
+
+        $stmt = $pdo->prepare("
+        UPDATE responsivas
+        SET estado = 'REVOCADA'
+        WHERE equipo_id = ?
+        AND estado = 'ACTIVA'
+        ");
+
+        $stmt->execute([$id]);
+    }
+
+    $pdo->commit();
+
     echo json_encode(['success' => true]);
 
 } catch (Exception $e) {
+
+    $pdo->rollBack();
     echo json_encode(['error' => 'Error al actualizar']);
 }

@@ -406,10 +406,6 @@ function verDetalle(id) {
     location.href = `inventario/equipo.html?id=${id}`;
 }
 
-function asignarEquipo(id) {
-    alert("Asignar equipo ID: " + id);
-}
-
 function cerrarModal() {
     document.getElementById("modalEquipo").style.display = "none";
 }
@@ -546,6 +542,12 @@ function confirmarAsignacion() {
         }
 
         document.getElementById("modalAsignar").style.display = "none";
+
+        // 🔥 SI ES COMPUTADORA → abrir responsiva
+        if (data.tipo === "Computadora") {
+            abrirModalResponsiva(equipoAsignarId, num_emp);
+        }
+
         cargarEquipos();
     });
 }
@@ -1162,4 +1164,256 @@ for (let i = 1; i <= totalPages1; i++) {
 
     doc.save('Inventario_TI.pdf');
   };
+}
+
+let equipoActualId = null;
+let empleadoActual = null;
+
+let padUsuario = null;
+let padAdmin = null;
+
+function abrirModalResponsiva(equipoId, numEmp) {
+
+  equipoActualId = equipoId;
+  empleadoActual = numEmp;
+
+  document.getElementById("modalResponsiva").style.display = "flex";
+
+  const canvasUsuario = document.getElementById("firmaUsuario");
+  const canvasAdmin = document.getElementById("firmaAdmin");
+
+  padUsuario = new SignaturePad(canvasUsuario);
+  padAdmin = new SignaturePad(canvasAdmin);
+}
+
+function cerrarModalResponsiva() {
+  document.getElementById("modalResponsiva").style.display = "none";
+  if (padUsuario) padUsuario.clear();
+  if (padAdmin) padAdmin.clear();
+}
+
+async function guardarResponsiva() {
+
+  if (padUsuario.isEmpty() || padAdmin.isEmpty()) {
+    alert("Ambas firmas son obligatorias");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("equipo_id", equipoActualId);
+  formData.append("num_emp", empleadoActual);
+  formData.append("firma_usuario", padUsuario.toDataURL());
+  formData.append("firma_admin", padAdmin.toDataURL());
+
+  const res = await fetch("/ticketssoporteti/backend/responsivas/create.php", {
+    method: "POST",
+    body: formData,
+    credentials: "include"
+  });
+
+  const data = await res.json();
+
+  if (data.ok) {
+    generarPDFResponsiva(data.folio, data.token_publico);
+    cerrarModalResponsiva();
+  }
+}
+
+async function generarPDFResponsiva(folio, token) {
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "letter"
+  });
+
+  const margin = 15;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  const logo = new Image();
+  logo.src = "/ticketssoporteti/frontend/login/assets/logo-forsis.png";
+
+  logo.onload = async function () {
+
+    /* ==============================
+       MARCA DE AGUA
+    ============================== */
+    doc.setGState(new doc.GState({ opacity: 0.05 }));
+    doc.addImage(logo, "PNG",
+      (pageWidth - 120) / 2,
+      (pageHeight - 120) / 2,
+      120,
+      120
+    );
+    doc.setGState(new doc.GState({ opacity: 1 }));
+
+    /* ==============================
+       HEADER
+    ============================== */
+    doc.autoTable({
+      startY: 10,
+      margin: { left: margin, right: margin },
+      body: [
+        [
+          { content: '', rowSpan: 6, styles: { cellWidth: 30 } },
+          { content: 'RESPONSIVA Y RESGUARDO DE EQUIPO DE CÓMPUTO', colSpan: 4, styles: { halign: 'center', fontStyle: 'bold', fontSize: 12 } }
+        ],
+        [
+          { content: 'FLETES Y MATERIALES FORSIS, S.A. DE C.V.', colSpan: 4, styles: { halign: 'center', textColor: [220,38,38], fontStyle: 'bold' } }
+        ],
+        [
+          { content: 'FECHA', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'PAG.', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'REVISION', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'CÓDIGO', styles: { halign: 'center', fontStyle: 'bold' } }
+        ],
+        [
+          { content: new Date().toLocaleDateString(), styles: { halign: 'center' } },
+          { content: '1 de 1', styles: { halign: 'center' } },
+          { content: '0', styles: { halign: 'center' } },
+          { content: 'FMF-FOR-SIS-001', styles: { halign: 'center' } }
+        ],
+        [
+          { content: 'FOLIO:', styles: { halign: 'right', fontStyle: 'bold' } },
+          { content: folio, colSpan: 3 }
+        ]
+      ],
+      theme: "grid",
+      styles: { fontSize: 8 }
+    });
+
+    doc.addImage(logo, "PNG", margin + 3, 13, 24, 24);
+
+    let y = doc.lastAutoTable.finalY + 10;
+
+        /* ==============================
+    QR POSICIONADO DEBAJO DEL HEADER
+    ============================== */
+
+    const qrUrl = `http://${window.location.hostname}/ticketssoporteti/backend/public/responsiva.php?token=${token}`;
+
+    const qrContainer = document.createElement("div");
+
+    new QRCode(qrContainer, {
+    text: qrUrl,
+    width: 120,
+    height: 120
+    });
+
+    let qrImg;
+    const canvas = qrContainer.querySelector("canvas");
+    const img = qrContainer.querySelector("img");
+
+    if (canvas) {
+    qrImg = canvas.toDataURL("image/png");
+    } else if (img) {
+    qrImg = img.src;
+    }
+
+    const qrSize = 30;
+
+    // 🔥 alineado con borde derecho de la tabla
+    const qrX = pageWidth - margin - qrSize;
+
+    // 🔥 alineado verticalmente con "DATOS DEL EQUIPO"
+    const qrY = y - 5;
+
+    doc.addImage(
+    qrImg,
+    "PNG",
+    qrX,
+    qrY,
+    qrSize,
+    qrSize
+    );
+
+    /* ==============================
+       DATOS EQUIPO (desde snapshot backend)
+    ============================== */
+
+    const res = await fetch(`/ticketssoporteti/backend/responsivas/get_by_token.php?token=${token}`);
+    const data = await res.json();
+
+    const eq = data.snapshot_equipo;
+    const emp = data.snapshot_empleado;
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, "bold");
+    doc.text("DATOS DEL EQUIPO", margin, y);
+    y += 6;
+
+    doc.setFont(undefined, "normal");
+    doc.setFontSize(10);
+
+    doc.text(`Identificador: ${eq.identificador}`, margin, y); y += 6;
+    doc.text(`Marca / Modelo: ${eq.marca} ${eq.modelo}`, margin, y); y += 6;
+    doc.text(`Serie: ${eq.numero_serie || '-'}`, margin, y); y += 6;
+    doc.text(`Procesador: ${eq.procesador}`, margin, y); y += 6;
+    doc.text(`RAM: ${eq.ram}`, margin, y); y += 6;
+    doc.text(`Sistema Operativo: ${eq.sistema_operativo}`, margin, y); y += 10;
+
+    /* ==============================
+       DATOS EMPLEADO
+    ============================== */
+
+    doc.setFont(undefined, "bold");
+    doc.text("DATOS DEL USUARIO", margin, y);
+    y += 6;
+
+    doc.setFont(undefined, "normal");
+    doc.text(`Nombre: ${emp.nombre}`, margin, y); y += 6;
+    doc.text(`Número empleado: ${emp.num_emp}`, margin, y); y += 6;
+    doc.text(`Departamento: ${emp.departamento}`, margin, y); y += 10;
+
+    /* ==============================
+       CLÁUSULA CORTA
+    ============================== */
+
+    doc.setFontSize(9);
+    doc.text(
+      "Declaro recibir el equipo descrito en óptimas condiciones y me comprometo a su resguardo y buen uso.",
+      margin,
+      y,
+      { maxWidth: pageWidth - 30 }
+    );
+
+    y += 25;
+
+    /* ==============================
+       FIRMAS
+    ============================== */
+
+    const firmaUsuarioImg = `/ticketssoporteti/uploads/responsivas/${data.firma_usuario}`;
+    const firmaAdminImg = `/ticketssoporteti/uploads/responsivas/${data.firma_admin}`;
+
+    doc.text("Firma Usuario", margin, y);
+    doc.text("Firma Sistemas", pageWidth - 70, y);
+
+    y += 5;
+
+    const firmaUsuario = await fetch(firmaUsuarioImg).then(r => r.blob());
+    const firmaAdmin = await fetch(firmaAdminImg).then(r => r.blob());
+
+    const userBase64 = await blobToBase64(firmaUsuario);
+    const adminBase64 = await blobToBase64(firmaAdmin);
+
+    doc.addImage(userBase64, "PNG", margin, y, 60, 25);
+    doc.addImage(adminBase64, "PNG", pageWidth - 75, y, 60, 25);
+
+    /* ==============================
+       QR
+    ============================== */
+
+    doc.save(`Responsiva_${folio}.pdf`);
+  };
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
 }
