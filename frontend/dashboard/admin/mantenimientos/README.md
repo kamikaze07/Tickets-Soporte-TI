@@ -1,35 +1,36 @@
 🛠️ Módulo de Mantenimientos TI
 
-Sistema de gestión de Mantenimientos Preventivos y Correctivos integrado al ecosistema de Inventario TI.
+Sistema integral para la gestión de Mantenimientos Preventivos y Correctivos, completamente integrado al módulo de Inventario TI.
 
-Permite:
+🚀 Funcionalidades Principales
 
-📅 Programar mantenimientos preventivos
+📅 Programación de mantenimientos preventivos
 
-🖊 Cerrar mantenimientos con firma digital
+🖊 Cierre con firma digital del técnico
 
-📷 Subir evidencia fotográfica
+📷 Carga obligatoria de evidencia fotográfica (2–3 imágenes)
 
-📄 Generar PDF dinámico (sin almacenar el archivo)
+📄 Generación dinámica de PDF (sin almacenamiento en servidor)
 
-🔐 Validar mantenimiento mediante QR público
+🔐 Validación pública mediante QR
 
-🕘 Registrar movimientos en historial del equipo
+🕘 Registro automático en historial del equipo
 
-📊 Visualización anual y mensual con calendario
+📊 Vista anual y mensual con calendario interactivo
 
 🧱 Arquitectura del Módulo
-
-El módulo está dividido en:
-
 frontend/dashboard/admin/mantenimientos/
 backend/mantenimientos/
 backend/public/
 uploads/mantenimientos/
 📁 Estructura de Carpetas
-📂 frontend/dashboard/admin/mantenimientos/
+📂 Frontend
 
-Contiene toda la lógica visual y generación de PDF:
+Ubicación:
+
+frontend/dashboard/admin/mantenimientos/
+
+Contiene:
 
 mantenimientos.js
 
@@ -37,48 +38,65 @@ mantenimientos.css
 
 Vista calendario (FullCalendar)
 
-Modal asignar
+Modal de asignación
 
-Modal cerrar
+Modal de cierre
 
 Canvas de firma
 
-Generador PDF (jsPDF)
+Generador de PDF (jsPDF)
 
-📂 backend/mantenimientos/
+📂 Backend – Endpoints
 
-Endpoints REST del módulo:
+Ubicación:
 
-Archivo	Función
-create_preventivo.php	Crear mantenimiento preventivo
-complete_mantenimiento.php	Cerrar mantenimiento
-list_year_summary.php	Resumen anual
-list_by_month.php	Lista mensual
-list_by_range.php	Eventos para calendario
-list_by_date.php	Mantenimientos por día
-get_full.php	Datos completos para PDF
-list_computadoras.php	Equipos elegibles
-📂 backend/public/
-Archivo	Función
-mantenimiento.php	Vista pública validada por token
-📂 uploads/mantenimientos/
+backend/mantenimientos/
 
-Estructura dinámica:
+Endpoints principales:
 
-uploads/mantenimientos/{id_mantenimiento}/
-    firma.png
-    foto_1.jpg
-    foto_2.jpg
-    foto_3.jpg
+create_preventivo.php → Crear mantenimiento
 
-No se almacenan PDFs.
+complete_mantenimiento.php → Cerrar mantenimiento
+
+list_year_summary.php → Resumen anual
+
+list_by_month.php → Lista mensual
+
+list_by_range.php → Eventos calendario
+
+list_by_date.php → Mantenimientos por día
+
+get_full.php → Datos completos para PDF
+
+list_computadoras.php → Equipos elegibles
+
+📂 Vista Pública
+
+Ubicación:
+
+backend/public/mantenimiento.php
+
+Función:
+
+Mostrar mantenimiento validado por token
+
+No requiere sesión
+
+Muestra datos, fotos y firma
+
+📂 Carpeta de Evidencias
+uploads/mantenimientos/{id}/
+    ├── firma.png
+    ├── foto_1.jpg
+    ├── foto_2.jpg
+    └── foto_3.jpg
+
+📌 No se almacenan PDFs.
 
 🗄️ Base de Datos
 📌 Tabla: mantenimientos
 
-Controla el ciclo completo del mantenimiento.
-
-Campos clave:
+Campos relevantes:
 
 equipo_id
 
@@ -90,25 +108,23 @@ fecha_programada
 
 fecha_realizada
 
+realizado_por
+
 firma_path
 
-fotos_evidencia (JSON)
+fotos_evidencia
 
 token_validacion
 
-realizado_por
-
 📌 Tabla: inventario_movimientos
 
-Registra eventos históricos del equipo.
-
-Tipos utilizados por este módulo:
+Tipos utilizados:
 
 mantenimiento_preventivo
 
 mantenimiento_correctivo
 
-Siempre registra:
+Campos:
 
 equipo_id
 
@@ -118,39 +134,39 @@ realizado_por
 
 fecha
 
-🔄 Flujo Completo del Módulo
+🔄 Flujo Operativo
 1️⃣ Programar Preventivo
 
-Se selecciona fecha
+Selección de fecha
 
-Se elige equipo
+Selección de equipo
 
-Se valida que no exista preventivo ese mes
+Validación de duplicado por mes
 
-Se inserta en mantenimientos
+Inserción en mantenimientos
 
-Se registra movimiento en historial
+Registro en historial
 
 Resultado:
-Estado = Pendiente
 
+estado = Pendiente
 2️⃣ Cerrar Mantenimiento
 
-Modal incluye:
+Requisitos obligatorios:
 
-📷 2 a 3 fotos obligatorias
+📷 2 a 3 fotos
 
-🖊 Firma en canvas obligatoria
+🖊 Firma digital
 
-Al confirmar:
+Proceso:
 
-Se crea carpeta en uploads
+Crear carpeta de evidencia
 
-Se guardan fotos
+Guardar firma
 
-Se guarda firma
+Guardar fotos
 
-Se actualiza mantenimiento:
+Actualizar mantenimiento:
 
 estado = Realizado
 
@@ -160,83 +176,41 @@ realizado_por
 
 token_validacion
 
-Se inserta movimiento histórico
+Insertar movimiento histórico
 
-Se genera PDF dinámico en frontend
+Generar PDF dinámico
 
-Resultado:
-Estado = Realizado
+📄 Generación de PDF
 
-3️⃣ Generación de PDF
-
-Se genera en frontend con:
+Se genera en frontend usando:
 
 jsPDF
 
 autoTable
 
-Marca de agua corporativa
+QRCode.js
 
-QR dinámico
+Incluye:
 
-Evidencia en bloque horizontal
+Encabezado corporativo
+
+Marca de agua
+
+Datos del equipo
+
+Especificaciones
+
+Evidencia fotográfica en bloque horizontal
 
 Firma del técnico
 
-El PDF:
+Código QR de validación
 
-❌ NO se guarda en servidor
+📌 El PDF:
 
-✅ Se puede regenerar en cualquier momento
+No se guarda
 
-✅ Siempre usa datos actuales
-
-4️⃣ Validación por QR
-
-El QR contiene:
-
-backend/public/mantenimiento.php?token=XXXX
-
-El token:
-
-Es único
-
-Se guarda en token_validacion
-
-Solo funciona si estado = Realizado
-
-La vista pública:
-
-No requiere sesión
-
-Muestra datos
-
-Muestra fotos
-
-Muestra firma
-
-Es segura (no expone IDs internos)
-
-📅 Sistema de Visualización
-Vista Anual
-
-12 tarjetas
-
-Indicador de pendientes
-
-Indicador de completos
-
-Resumen por mes
-
-Vista Mensual
-
-FullCalendar
-
-Vista month / week / list
-
-Eventos dinámicos
-
-Cambio responsive móvil
+Se regenera cuando se descarga
 
 🖊 Firma Digital
 
@@ -254,77 +228,72 @@ Guardado en PNG
 
 📷 Compresión de Imágenes
 
-Antes de enviar al backend:
+Antes de enviarse al backend:
 
-Se redimensionan
+Redimensionadas proporcionalmente
 
-Se comprimen a JPEG
+Convertidas a JPEG
 
-Máx 1280px
+Máximo 1280px
 
 Calidad 0.7
 
-Límite 10MB original
+Límite original 10MB
 
-Optimiza peso del PDF.
+Beneficio:
+
+Optimiza peso del PDF
+
+Reduce carga del servidor
 
 🔐 Seguridad
 
-Validación de sesión en todos los endpoints privados
+Validación de sesión en endpoints privados
 
 Tokens únicos para vista pública
 
-Validación de estado antes de mostrar mantenimiento
+Validación de estado = Realizado
 
-Transacciones en cierre
+Uso de transacciones PDO
 
 Control de duplicados por mes
 
-⚙️ Buenas Prácticas Aplicadas
+Prepared Statements
 
-Transacciones PDO
+📅 Sistema de Visualización
+Vista Anual
 
-Prepared statements
+12 tarjetas
 
-Validación frontend + backend
+Indicador de pendientes
 
-No almacenamiento innecesario de PDF
+Indicador de completos
 
-Historial centralizado
+Resumen mensual
 
-Separación clara frontend/backend
+Vista Mensual
 
-Estructura modular
+FullCalendar
 
-🚀 Estado del Módulo
+Vista Month / Week / List
 
-✔ Programación funcional
-✔ Cierre con firma
-✔ Evidencia fotográfica
-✔ PDF dinámico corporativo
-✔ QR validable
-✔ Historial integrado
-✔ Calendario anual/mensual
-✔ Responsive
+Responsive móvil
 
-🧠 Decisiones Técnicas Importantes
-❌ No guardar PDF en base de datos
+Eventos dinámicos
 
-Evita peso innecesario y duplicación.
+🧠 Decisiones Técnicas
 
-❌ No guardar PDF en servidor
-
-Siempre se regenera dinámicamente.
+❌ No almacenar PDFs
 
 ✅ Guardar solo evidencia real
 
-Firma + fotos.
+✅ Regeneración dinámica
 
 ✅ Token público independiente
 
-Evita exponer ID interno.
+✅ Separación frontend/backend clara
 
-📌 Requisitos
+⚙️ Requisitos Técnicos
 
 PHP 8+
 
@@ -334,28 +303,24 @@ FullCalendar
 
 jsPDF
 
-autoTable
+jsPDF AutoTable
 
 QRCode.js
 
-🔮 Posibles Mejoras Futuras
+✅ Estado del Módulo
 
-Firma del usuario receptor
+✔ Programación funcional
 
-Aprobación digital
+✔ Cierre con firma
 
-Certificado digital
+✔ Evidencia obligatoria
 
-Exportación masiva
+✔ PDF dinámico
 
-Dashboard estadístico
+✔ QR validable
 
-Filtros avanzados
+✔ Historial integrado
 
-Auditoría extendida
+✔ Calendario anual/mensual
 
-👨‍💻 Autor
-
-Desarrollado como parte del sistema:
-
-Tickets de Soporte TI + Inventario TI
+✔ Responsive
