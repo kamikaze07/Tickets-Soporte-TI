@@ -1,62 +1,119 @@
 # 🖥 Sistema Integral de Gestión TI
 
+### Plataforma Modular de Operación Tecnológica Interna
+
 ![PHP](https://img.shields.io/badge/PHP-8%2B-777BB4?logo=php&logoColor=white)
 ![MariaDB](https://img.shields.io/badge/MariaDB-10%2B-003545?logo=mariadb&logoColor=white)
 ![WebSocket](https://img.shields.io/badge/WebSocket-RealTime-010101?logo=socketdotio&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)
 ![Apache](https://img.shields.io/badge/Apache-Compatible-D22128?logo=apache&logoColor=white)
 
-Sistema web interno para la gestión integral del área de TI.
+------------------------------------------------------------------------
 
-Incluye módulos de:
+# 🎯 Visión del Proyecto
 
--   🎫 Tickets
--   💻 Inventario
--   🛠 Mantenimientos
--   🧾 Responsivas (PDF + Firma Digital)
--   🏷 Etiquetas con QR
--   🔔 Comunicación en Tiempo Real
+El sistema evolucionó desde un gestor de tickets tradicional hacia una
+plataforma integral de gestión TI.
 
 ------------------------------------------------------------------------
 
-# 🧠 Arquitectura General
+# 🏗 Arquitectura de Infraestructura
 
 ``` mermaid
-flowchart TD
-    A[Frontend HTML CSS JS] --> B[API PHP Backend]
-    B --> C[MariaDB]
-    B --> D[WebSocket Server]
-    D --> A
+flowchart LR
+    User[Usuario / Soporte] --> Browser[Navegador]
+    Browser -->|HTTP| WebServer[Apache / Nginx]
+    WebServer -->|PHP| Backend[API PHP]
+    Backend --> DB[(MariaDB)]
+    Backend --> WS[Servidor WebSocket :8080]
+    WS --> Browser
 ```
 
 ------------------------------------------------------------------------
 
-# 📦 Módulos
+# 🧠 Arquitectura de Base de Datos (ERD)
 
--   [🎫 Tickets](./README-TICKETS.md)
--   [💻 Inventario](./README-INVENTARIO.md)
--   [🛠 Mantenimientos](./README-MANTENIMIENTOS.md)
--   [🧾 Responsivas](./README-RESPONSIVAS.md)
+``` mermaid
+erDiagram
+
+    USUARIOS {
+        int id
+        string num_emp
+        string nombre
+        string rol
+    }
+
+    TICKETS {
+        int id
+        int usuario_id
+        string estado
+        datetime fecha_creacion
+    }
+
+    MENSAJES {
+        int id
+        int ticket_id
+        int usuario_id
+        text mensaje
+        datetime fecha
+    }
+
+    EQUIPOS {
+        int id
+        string codigo_interno
+        string estado
+        string tipo
+    }
+
+    RESPONSIVAS {
+        int id
+        int equipo_id
+        int usuario_id
+        string estado
+        datetime fecha_generacion
+    }
+
+    MANTENIMIENTOS {
+        int id
+        int equipo_id
+        string tipo
+        text observaciones
+        datetime fecha
+    }
+
+    USUARIOS ||--o{ TICKETS : crea
+    TICKETS ||--o{ MENSAJES : contiene
+    USUARIOS ||--o{ MENSAJES : escribe
+    USUARIOS ||--o{ RESPONSIVAS : firma
+    EQUIPOS ||--o{ RESPONSIVAS : genera
+    EQUIPOS ||--o{ MANTENIMIENTOS : recibe
+```
 
 ------------------------------------------------------------------------
 
-# 🔐 Seguridad
+# 📈 Flujo Completo del Sistema
 
--   Validación de sesión en cada endpoint
--   Control de roles
--   Autenticación contra SicrePR
--   Validación backend obligatoria
+``` mermaid
+flowchart TD
 
-------------------------------------------------------------------------
+    A[Usuario crea Ticket] --> B[Validación Backend]
+    B --> C[Guardar en BD]
+    C --> D[Notificar vía WebSocket]
+    D --> E[Soporte atiende]
+    E --> F[Cambio de Estado]
+    F --> G[Cerrar Ticket]
 
-# 🚀 Instalación
+    H[Registrar Equipo] --> I[Asignar a Usuario]
+    I --> J[Capturar Firma]
+    J --> K[Generar PDF]
+    K --> L[Responsiva Activa]
 
-1.  Configurar Apache/Nginx
-2.  Configurar conexión a base de datos
-3.  Ejecutar esquemas SQL
-4.  Configurar variables en /infra/env
-5.  Iniciar servidor WebSocket
+    L --> M[Registrar mantenimiento]
+    M --> N[Equipo Disponible]
+```
 
 ------------------------------------------------------------------------
 
 📅 Última actualización: 2026-02-27
+
+👨‍💻 Proyecto desarrollado por César Soto
