@@ -1,5 +1,8 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../auth/authorize.php';
+requireRole(['SUPER USUARIO']);
+
 
 $token = $_GET['token'] ?? null;
 

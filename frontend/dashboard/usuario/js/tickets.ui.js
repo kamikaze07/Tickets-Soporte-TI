@@ -120,6 +120,12 @@ function renderTickets(tickets) {
 ================================ */
 async function verDetalle(ticketId) {
 
+    history.pushState(
+    { ticketId },
+    "",
+    `?ticket=${ticketId}`
+  );
+
   ticketActual = ticketId;
 
   document.getElementById('ticketsContainer').style.display = 'none';
@@ -413,16 +419,15 @@ function comprimirImagenLigera(file) {
 ================================ */
 loadTickets();
 
+const params = new URLSearchParams(window.location.search);
+const ticketFromURL = params.get("ticket");
+
+if (ticketFromURL) {
+  verDetalle(ticketFromURL);
+}
+
 document.getElementById('btnVolver')?.addEventListener('click', () => {
-
-  document.getElementById('ticketDetailView').style.display = 'none';
-  document.getElementById('ticketsContainer').style.display = 'block';
-  document.getElementById('pageTitle').textContent = 'Mis Tickets';
-
-  if (ws) {
-    ws.close();
-    ws = null;
-  }
+  history.back();
 });
 
 function openImageModal(src) {
@@ -439,5 +444,23 @@ document.getElementById("closeImageModal")?.addEventListener("click", () => {
 document.getElementById("imageModal")?.addEventListener("click", (e) => {
   if (e.target.id === "imageModal") {
     e.currentTarget.classList.add("hidden");
+  }
+});
+
+window.addEventListener("popstate", (event) => {
+
+  if (event.state && event.state.ticketId) {
+    // Volver a abrir ticket
+    verDetalle(event.state.ticketId);
+  } else {
+    // Volver al listado
+    document.getElementById('ticketDetailView').style.display = 'none';
+    document.getElementById('ticketsContainer').style.display = 'block';
+    document.getElementById('pageTitle').textContent = 'Mis Tickets';
+
+    if (ws) {
+      ws.close();
+      ws = null;
+    }
   }
 });

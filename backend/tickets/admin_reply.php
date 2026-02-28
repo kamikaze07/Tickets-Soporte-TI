@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../auth/authorize.php';
+requireRole(['SUPER USUARIO']);
 session_start();
 
 header('Content-Type: application/json');
