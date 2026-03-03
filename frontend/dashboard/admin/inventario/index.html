@@ -28,7 +28,11 @@
   <div class="modal-content">
     <h3>Asignar Equipo</h3>
 
-    <select id="usuarioSelect"></select>
+    <div class="buscador-empleado">
+      <input type="text" id="inputEmpleado" placeholder="Buscar por nombre o número...">
+      <div id="listaEmpleados" class="lista-empleados"></div>
+      <input type="hidden" id="empleadoSeleccionado">
+    </div>
 
     <div class="modal-actions">
       <button id="btnConfirmarAsignacion" class="btn">Asignar</button>

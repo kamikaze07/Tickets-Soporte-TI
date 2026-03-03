@@ -103,64 +103,96 @@ document.addEventListener("DOMContentLoaded", () => {
     validarFormularioCerrar();
   };
 
-document.getElementById("btnConfirmarCerrar").onclick = async function () {
+  document.getElementById("btnConfirmarCerrar").onclick = async function () {
 
-  if (!mantenimientoActivo) {
-    alert("Error: mantenimiento no válido.");
-    return;
-  }
+    if (!mantenimientoActivo) {
+      alert("Error: mantenimiento no válido.");
+      return;
+    }
 
-  this.disabled = true;
+    this.disabled = true;
 
-  const firmaBase64 = canvas.toDataURL("image/png");
+    const firmaBase64 = canvas.toDataURL("image/png");
 
-  const token = generarUUID();
-  const urlValidacion = `${window.location.origin}/ticketssoporteti/backend/public/mantenimiento.php?token=${token}`;
+    const token = generarUUID();
+    const urlValidacion = `${window.location.origin}/ticketssoporteti/backend/public/mantenimiento.php?token=${token}`;
 
-  const qrBase64 = await generarQRBase64(urlValidacion);
+    const qrBase64 = await generarQRBase64(urlValidacion);
 
-  const payload = {
-    mantenimiento_id: mantenimientoActivo,
-    firma: firmaBase64,
-    fotos: fotosSeleccionadas,
-    token: token
+    const payload = {
+      mantenimiento_id: mantenimientoActivo,
+      firma: firmaBase64,
+      fotos: fotosSeleccionadas,
+      token: token
+    };
+
+    const res = await fetch(
+      "/ticketssoporteti/backend/mantenimientos/complete_mantenimiento.php",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const result = await res.json();
+
+    if (!result.ok) {
+      alert(result.msg);
+      this.disabled = false;
+      return;
+    }
+
+    // 🔥 GENERAMOS PDF DESPUÉS DE GUARDAR
+    const fullData = await fetch(
+      `/ticketssoporteti/backend/mantenimientos/get_full.php?id=${mantenimientoActivo}`
+    ).then(r => r.json());
+
+    await generarPDFMantenimiento(fullData, qrBase64);
+
+    calendar.refetchEvents();
+    renderVistaAnual();
+    renderTablaMes(currentYear, currentMonth);
+    document.getElementById("modalCerrar").style.display = "none";
+    resetModalCerrar();
+    mantenimientoActivo = null;
+
+    this.disabled = false;
+
   };
 
-  const res = await fetch(
-    "/ticketssoporteti/backend/mantenimientos/complete_mantenimiento.php",
-    {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    }
-  );
+  const selectPrograma = document.getElementById("selectAnioPrograma");
+  const anioActual = new Date().getFullYear();
 
-  const result = await res.json();
-
-  if (!result.ok) {
-    alert(result.msg);
-    this.disabled = false;
-    return;
+  for (let i = anioActual; i >= 2020; i--) {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = i;
+    selectPrograma.appendChild(option);
   }
 
-  // 🔥 GENERAMOS PDF DESPUÉS DE GUARDAR
-  const fullData = await fetch(
-    `/ticketssoporteti/backend/mantenimientos/get_full.php?id=${mantenimientoActivo}`
-  ).then(r => r.json());
+  selectPrograma.value = anioActual;
 
-  await generarPDFMantenimiento(fullData, qrBase64);
+  document.getElementById("btnGenerarProgramaAnual")
+  .addEventListener("click", async () => {
 
-  calendar.refetchEvents();
-  renderVistaAnual();
-  renderTablaMes(currentYear, currentMonth);
-  document.getElementById("modalCerrar").style.display = "none";
-  resetModalCerrar();
-  mantenimientoActivo = null;
+    const anio = document.getElementById("selectAnioPrograma").value;
 
-  this.disabled = false;
+    const res = await fetch(
+      `/ticketssoporteti/backend/mantenimientos/programa_anual.php?year=${anio}`,
+      { credentials: "include" }
+    );
 
-};
+    const data = await res.json();
+
+    if (!data.length) {
+      alert("No hay mantenimientos preventivos ese año.");
+      return;
+    }
+
+    generarPDFProgramaAnual(data, anio);
+  });
 
 });
 
@@ -460,9 +492,19 @@ async function abrirModalAsignar() {
     document.getElementById("btnGuardarPreventivo").disabled = false;
 
     equipos.forEach(eq => {
+
       const option = document.createElement("option");
       option.value = eq.id;
-      option.textContent = eq.identificador;
+
+      let texto = eq.identificador;
+
+      if (eq.usuario) {
+        texto += ` (Asignado a: ${eq.usuario})`;
+      } else {
+        texto += ` (Disponible)`;
+      }
+
+      option.textContent = texto;
       select.appendChild(option);
     });
   }
@@ -908,4 +950,212 @@ function blobToBase64(blob) {
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
+}
+
+async function generarPDFProgramaAnual(data, anio) {
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: "letter"
+  });
+
+  const margin = 15;
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  const folio = `PMA-${anio}-${Date.now().toString().slice(-4)}`;
+
+  // LOGO
+  const logo = new Image();
+  logo.src = "/ticketssoporteti/frontend/login/assets/logo-forsis.png";
+  await new Promise(resolve => logo.onload = resolve);
+
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // Marca de agua
+  doc.setGState(new doc.GState({ opacity: 0.05 }));
+
+  doc.addImage(
+    logo,
+    "PNG",
+    pageWidth / 2 - 70,
+    pageHeight / 2 - 70,
+    140,
+    140
+  );
+
+  doc.setGState(new doc.GState({ opacity: 1 }));
+
+  // Fecha elaboración dinámica (día del click)
+  const hoy = new Date();
+  const fechaElaboracion = hoy.toLocaleDateString("es-MX");
+
+  // =========================
+  // CUADRO SUPERIOR FORMATO OFICIAL
+  // =========================
+
+  doc.autoTable({
+    startY: 10,
+    margin: { left: 10, right: 10 },
+    body: [
+
+      // FILA 1
+      [
+        { content: '', rowSpan: 5, styles: { cellWidth: 30 } },
+        {
+          content: 'FLETES Y MATERIALES FORSIS, S.A. DE C.V.',
+          colSpan: 4,
+          styles: {
+            halign: 'center',
+            textColor: [220,38,38],
+            fontStyle: 'bold',
+            fontSize: 11
+          }
+        }
+      ],
+
+      // FILA 2
+      [
+        {
+          content: `Programa Anual de Mantenimiento Preventivo ${anio}`,
+          colSpan: 4,
+          styles: { halign: 'center', fontStyle: 'bold' }
+        }
+      ],
+
+      // FILA 3
+      [
+        { content: 'FECHA', styles: { fontStyle: 'bold' } },
+        { content: '11/11/18' },
+        { content: 'PAG.', styles: { fontStyle: 'bold' } },
+        { content: '1 de 1' }
+      ],
+
+      // FILA 4
+      [
+        { content: 'REVISIÓN', styles: { fontStyle: 'bold' } },
+        { content: '0' },
+        { content: 'CÓDIGO', styles: { fontStyle: 'bold' } },
+        { content: 'FMF-FOR-SIS-002' }
+      ],
+
+      // FILA 5
+      [
+        { content: 'Fecha de elaboración', styles: { fontStyle: 'bold' } },
+        { content: fechaElaboracion },
+        { content: 'Elaboró:', styles: { fontStyle: 'bold' } },
+        { content: 'Cesar L. Soto Gonzalez' }
+      ]
+    ],
+    theme: "grid",
+    styles: {
+      fontSize: 8,
+      cellPadding: 2
+    }
+  });
+
+  // Insertar logo encima del cuadro
+  doc.addImage(logo, "PNG", 13, 13, 24, 24);
+
+  // Agrupar por equipo
+  const mapa = {};
+
+  data.forEach(item => {
+
+    if (!mapa[item.identificador]) {
+      mapa[item.identificador] = {
+        marca: item.marca || "",
+        modelo: item.modelo || "",
+        usuario: item.usuario ? item.usuario : "Sin usuario",
+        meses: Array(12).fill(null)
+      };
+    }
+
+    // Guardamos el ESTADO real
+    mapa[item.identificador].meses[item.mes - 1] = item.estado;
+  });
+
+const body = [];
+
+Object.keys(mapa).forEach(eq => {
+
+  const equipo = mapa[eq];
+
+  const fila = [
+    eq,
+    (equipo.marca + " " + equipo.modelo).trim(),
+    equipo.usuario
+  ];
+
+  equipo.meses.forEach(estado => {
+
+    let cell = {
+      content: "",
+      styles: {
+        lineWidth: 0.3
+      }
+    };
+
+    if (estado === "Realizado") {
+      cell.styles.fillColor = [34,197,94]; // verde
+    }
+
+    if (estado === "Pendiente") {
+      cell.styles.fillColor = [245,158,11]; // amarillo
+    }
+
+    if (estado === "Cancelado") {
+      cell.styles.fillColor = [239,68,68]; // rojo
+    }
+
+    fila.push(cell);
+  });
+
+  body.push(fila);
+});
+
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 10,
+    styles: {
+      fontSize: 7,
+      halign: "center",
+      valign: "middle"
+    },
+    columnStyles: {
+      0: { halign: "left" },
+      1: { halign: "left" },
+      2: { halign: "left" }
+    },
+    headStyles: {
+      fillColor: [15, 23, 42], // azul oscuro elegante
+      textColor: 255,
+      halign: "center",
+      fontStyle: "bold"
+    },
+  head: [[
+    "Equipo",
+    "Marca / Modelo",
+    "Usuario",
+    "Ene","Feb","Mar","Abr","May","Jun",
+    "Jul","Ago","Sep","Oct","Nov","Dic"
+  ]],
+    body: body,
+    theme: "grid",
+    styles: { fontSize: 7 }
+  });
+
+  const totalPages = doc.internal.getNumberOfPages();
+
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.text(
+      `Página ${i} de ${totalPages}`,
+      pageWidth - 40,
+      doc.internal.pageSize.getHeight() - 10
+    );
+  }
+
+  doc.save(`Programa_Anual_Mantenimiento_${anio}.pdf`);
 }

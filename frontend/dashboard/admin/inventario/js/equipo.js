@@ -267,20 +267,22 @@ async function generarPDFResponsiva(folio, token) {
           { content: 'FLETES Y MATERIALES FORSIS, S.A. DE C.V.', colSpan: 4, styles: { halign: 'center', textColor: [220,38,38], fontStyle: 'bold' } }
         ],
         [
-          { content: 'FECHA', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'FECHA DE EMISIÓN', styles: { halign: 'center', fontStyle: 'bold' } },
           { content: 'PAG.', styles: { halign: 'center', fontStyle: 'bold' } },
           { content: 'REVISION', styles: { halign: 'center', fontStyle: 'bold' } },
           { content: 'CÓDIGO', styles: { halign: 'center', fontStyle: 'bold' } }
         ],
         [
-          { content: new Date().toLocaleDateString(), styles: { halign: 'center' } },
+          { content: '10/11/2018', styles: { halign: 'center' } },
           { content: '1 de 1', styles: { halign: 'center' } },
           { content: '0', styles: { halign: 'center' } },
           { content: 'FMF-FOR-SIS-001', styles: { halign: 'center' } }
         ],
         [
-          { content: 'FOLIO:', styles: { halign: 'right', fontStyle: 'bold' } },
-          { content: folio, colSpan: 3 }
+          { content: 'Fecha de Generación:', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: new Date().toLocaleDateString(), styles: { halign: 'center' }},
+          { content: 'FOLIO:', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: folio, styles: { halign: 'center' } }
         ]
       ],
       theme: "grid",
@@ -352,7 +354,6 @@ async function generarPDFResponsiva(folio, token) {
 
     doc.text(`Identificador: ${eq.identificador}`, margin, y); y += 6;
     doc.text(`Marca / Modelo: ${eq.marca} ${eq.modelo}`, margin, y); y += 6;
-    doc.text(`Serie: ${eq.numero_serie || '-'}`, margin, y); y += 6;
     doc.text(`Procesador: ${eq.procesador}`, margin, y); y += 6;
     doc.text(`RAM: ${eq.ram}`, margin, y); y += 6;
     doc.text(`Sistema Operativo: ${eq.sistema_operativo}`, margin, y); y += 10;

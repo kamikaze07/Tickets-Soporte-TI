@@ -502,28 +502,66 @@ function asignarEquipo(id) {
 
     equipoAsignarId = id;
 
-    fetch('/ticketssoporteti/backend/inventario/asignaciones/usuarios.php')
-        .then(res => res.json())
-        .then(data => {
+    document.getElementById("modalAsignar").style.display = "flex";
 
-            const select = document.getElementById("usuarioSelect");
-            select.innerHTML = "";
+    const input = document.getElementById("inputEmpleado");
+    const lista = document.getElementById("listaEmpleados");
+    const hidden = document.getElementById("empleadoSeleccionado");
 
-            data.forEach(u => {
-                select.innerHTML += `
-                    <option value="${u.num_emp}">
-                        ${u.nombre_usu}
-                    </option>
-                `;
-            });
+    input.value = "";
+    hidden.value = "";
+    lista.innerHTML = "";
 
-            document.getElementById("modalAsignar").style.display = "flex";
-        });
+    let timeout = null;
+
+    input.oninput = function () {
+
+        clearTimeout(timeout);
+
+        const query = this.value.trim();
+
+        if (query.length < 2) {
+            lista.innerHTML = "";
+            return;
+        }
+
+        timeout = setTimeout(() => {
+
+            fetch(`/ticketssoporteti/backend/inventario/asignaciones/buscar_empleados.php?q=${query}`)
+                .then(res => res.json())
+                .then(data => {
+
+                    lista.innerHTML = "";
+
+                    data.forEach(emp => {
+
+                        const div = document.createElement("div");
+                        div.className = "item-empleado";
+                        div.textContent = `${emp.clave_emp} - ${emp.nombre} ${emp.ap_pat} ${emp.ap_mat}`;
+
+                        div.onclick = () => {
+                            input.value = div.textContent;
+                            hidden.value = emp.clave_emp;
+                            lista.innerHTML = "";
+                        };
+
+                        lista.appendChild(div);
+                    });
+
+                });
+
+        }, 300);
+    };
 }
 
 function confirmarAsignacion() {
 
-    const num_emp = document.getElementById("usuarioSelect").value;
+    const num_emp = document.getElementById("empleadoSeleccionado").value;
+
+    if (!num_emp) {
+        alert("Seleccione un empleado");
+        return;
+    }
 
     fetch('/ticketssoporteti/backend/inventario/asignaciones/asignar.php', {
         method: 'POST',
@@ -1264,20 +1302,22 @@ async function generarPDFResponsiva(folio, token) {
           { content: 'FLETES Y MATERIALES FORSIS, S.A. DE C.V.', colSpan: 4, styles: { halign: 'center', textColor: [220,38,38], fontStyle: 'bold' } }
         ],
         [
-          { content: 'FECHA', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'FECHA DE EMISIÓN', styles: { halign: 'center', fontStyle: 'bold' } },
           { content: 'PAG.', styles: { halign: 'center', fontStyle: 'bold' } },
           { content: 'REVISION', styles: { halign: 'center', fontStyle: 'bold' } },
           { content: 'CÓDIGO', styles: { halign: 'center', fontStyle: 'bold' } }
         ],
         [
-          { content: new Date().toLocaleDateString(), styles: { halign: 'center' } },
+          { content: '10/11/2018', styles: { halign: 'center' } },
           { content: '1 de 1', styles: { halign: 'center' } },
           { content: '0', styles: { halign: 'center' } },
           { content: 'FMF-FOR-SIS-001', styles: { halign: 'center' } }
         ],
         [
-          { content: 'FOLIO:', styles: { halign: 'right', fontStyle: 'bold' } },
-          { content: folio, colSpan: 3 }
+          { content: 'Fecha de Generación:', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: new Date().toLocaleDateString(), styles: { halign: 'center' }},
+          { content: 'FOLIO:', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: folio, styles: { halign: 'center' }}
         ]
       ],
       theme: "grid",
@@ -1349,7 +1389,6 @@ async function generarPDFResponsiva(folio, token) {
 
     doc.text(`Identificador: ${eq.identificador}`, margin, y); y += 6;
     doc.text(`Marca / Modelo: ${eq.marca} ${eq.modelo}`, margin, y); y += 6;
-    doc.text(`Serie: ${eq.numero_serie || '-'}`, margin, y); y += 6;
     doc.text(`Procesador: ${eq.procesador}`, margin, y); y += 6;
     doc.text(`RAM: ${eq.ram}`, margin, y); y += 6;
     doc.text(`Sistema Operativo: ${eq.sistema_operativo}`, margin, y); y += 10;

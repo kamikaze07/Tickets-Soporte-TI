@@ -8,15 +8,39 @@ if (!$token) {
 }
 
 $stmt = $pdo->prepare("
-    SELECT identificador, tipo, marca, modelo, estado, especificaciones_json
-    FROM inventario_equipos
-    WHERE token_publico = :token
-    AND activo_publico = 1
+    SELECT 
+        e.identificador,
+        e.tipo,
+        e.marca,
+        e.modelo,
+        e.estado,
+        e.especificaciones_json,
+        emp.nombre,
+        emp.ap_pat,
+        emp.ap_mat
+    FROM inventario_equipos e
+    LEFT JOIN inventario_asignaciones a
+        ON a.equipo_id = e.id
+        AND a.estado = 'activo'
+    LEFT JOIN empleados emp
+        ON emp.clave_emp = a.num_emp
+    WHERE e.token_publico = :token
+    AND e.activo_publico = 1
     LIMIT 1
 ");
 
 $stmt->execute([':token' => $token]);
 $equipo = $stmt->fetch();
+
+$nombreAsignado = null;
+
+if (!empty($equipo['nombre'])) {
+    $nombreAsignado = trim(
+        $equipo['nombre'] . ' ' .
+        $equipo['ap_pat'] . ' ' .
+        $equipo['ap_mat']
+    );
+}
 
 if (!$equipo) {
     die("Equipo no encontrado");
@@ -112,6 +136,12 @@ h1 {
             <?= htmlspecialchars($equipo['estado']) ?>
         </span>
     </p>
+    <p>
+    <strong>Asignado a:</strong>
+    <?= $nombreAsignado 
+        ? htmlspecialchars($nombreAsignado) 
+        : "Disponible" ?>
+    </p>
 
     <?php if ($equipo['marca']): ?>
         <p><strong>Marca:</strong> <?= htmlspecialchars($equipo['marca']) ?></p>
@@ -125,12 +155,19 @@ h1 {
     <div class="specs">
         <h3>Especificaciones</h3>
 
-        <?php foreach ($specs as $key => $value): ?>
-            <div class="spec-item">
-                <strong><?= ucfirst(str_replace('_',' ', $key)) ?>:</strong>
-                <?= htmlspecialchars($value) ?>
-            </div>
-        <?php endforeach; ?>
+    <?php foreach ($specs as $key => $value): ?>
+
+        <?php 
+            // 🔥 Ocultar número de serie
+            if ($key === 'numero_serie') continue; 
+        ?>
+
+        <div class="spec-item">
+            <strong><?= ucfirst(str_replace('_',' ', $key)) ?>:</strong>
+            <?= htmlspecialchars($value) ?>
+        </div>
+
+    <?php endforeach; ?>
     </div>
     <?php endif; ?>
 

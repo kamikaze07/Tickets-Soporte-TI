@@ -16,14 +16,42 @@ if (!isset($_SESSION['num_emp'])) {
 try {
 
     $stmt = $pdo->query("
-        SELECT id, identificador
-        FROM inventario_equipos
-        WHERE tipo = 'Computadora'
-        AND estado != 'Baja'
-        ORDER BY identificador ASC
+        SELECT 
+            e.id,
+            e.identificador,
+            emp.nombre,
+            emp.ap_pat,
+            emp.ap_mat
+        FROM inventario_equipos e
+        LEFT JOIN inventario_asignaciones ia 
+            ON ia.equipo_id = e.id 
+            AND ia.estado = 'activo'
+        LEFT JOIN empleados emp 
+            ON emp.clave_emp = ia.num_emp
+            AND emp.actual = 0
+        WHERE e.tipo = 'Computadora'
+        AND e.estado != 'Baja'
+        ORDER BY e.identificador ASC
     ");
 
-    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $equipos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($equipos as &$eq) {
+
+        if ($eq['nombre']) {
+            $eq['usuario'] = trim(
+                $eq['nombre'] . ' ' . 
+                $eq['ap_pat'] . ' ' . 
+                $eq['ap_mat']
+            );
+        } else {
+            $eq['usuario'] = null;
+        }
+
+        unset($eq['nombre'], $eq['ap_pat'], $eq['ap_mat']);
+    }
+
+    echo json_encode($equipos);
 
 } catch (Exception $e) {
     http_response_code(500);

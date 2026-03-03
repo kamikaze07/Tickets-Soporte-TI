@@ -458,3 +458,29 @@ th[data-col]:hover {
   transform: scale(1.1);
   cursor: pointer;
 }
+
+.buscador-empleado {
+  position: relative;
+}
+
+.lista-empleados {
+  position: absolute;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-top: 4px;
+  z-index: 999;
+}
+
+.item-empleado {
+  padding: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.item-empleado:hover {
+  background: #f1f5f9;
+}
