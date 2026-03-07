@@ -189,6 +189,13 @@ async function initDashboard() {
     `${BASE_PATH}/frontend/dashboard/usuario/components/modal_crear_ticket.html`
   );
 
+    await loadComponent(
+    'cardboard',
+    `${BASE_PATH}/frontend/dashboard/usuario/components/cardboard.html`
+  );
+
+  cargarMisEquipos();
+
   const title = document.getElementById('ticketsTitle');
   if (title && user?.nombre_usu) {
     title.textContent = `Tickets de ${user.nombre_usu}`;
@@ -225,8 +232,14 @@ function initCrearTicket() {
   const form = document.getElementById('formCrearTicket');
   if (!form) return;
 
+  const btnSubmit = form.querySelector('button[type="submit"]');
+  let enviando = false; // 🛡️ evita doble envío
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Si ya está enviando, ignorar
+    if (enviando) return;
 
     const titulo = document.getElementById('titulo')?.value.trim();
     const descripcion = document.getElementById('descripcion')?.value.trim();
@@ -236,6 +249,13 @@ function initCrearTicket() {
     if (!titulo || !descripcion) {
       showToast('Título y descripción obligatorios', 'error');
       return;
+    }
+
+    // 🔒 bloquear botón
+    enviando = true;
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Creando...';
     }
 
     try {
@@ -279,7 +299,87 @@ function initCrearTicket() {
     } catch (err) {
       console.error(err);
       showToast('Error de conexión', 'error');
+
+    } finally {
+
+      // 🔓 volver a habilitar botón
+      enviando = false;
+
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Crear Ticket';
+      }
+
     }
   });
 }
 
+async function cargarMisEquipos() {
+
+  try {
+
+    const res = await fetch(
+      `${BASE_PATH}/backend/inventario/get_user_devices.php`,
+      { credentials: 'include' }
+    );
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    const container = document.getElementById("misEquiposContainer");
+
+    if (!container) return;
+
+    if (!data.ok || !data.equipos.length) {
+      container.innerHTML = `<p>No tienes dispositivos asignados.</p>`;
+      return;
+    }
+
+    let html = "";
+
+    data.equipos.forEach(eq => {
+
+      const specs = eq.especificaciones || {};
+
+      let icon = "💻";
+
+      if (eq.tipo === "Monitor") icon = "🖥";
+      if (eq.tipo === "Impresora") icon = "🖨";
+
+      html += `
+        <div class="device-card">
+          <div class="device-title">
+            ${icon} ${eq.tipo}
+          </div>
+
+          <div class="device-main">
+            ${eq.marca ?? ""} ${eq.modelo ?? ""}
+          </div>
+      `;
+
+      if (eq.numero_serie) {
+        html += `<div class="device-meta">S/N: ${eq.numero_serie}</div>`;
+      }
+
+      html += `<div class="device-specs">`;
+
+      Object.entries(specs).forEach(([key,val]) => {
+
+        html += `
+          <div class="device-spec">
+            <span>${key}</span>: ${val}
+          </div>
+        `;
+      });
+
+      html += `</div></div>`;
+    });
+
+    container.innerHTML = html;
+
+  } catch (err) {
+    console.error("Error cargando equipos", err);
+  }
+
+}

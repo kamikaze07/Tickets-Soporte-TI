@@ -1049,10 +1049,7 @@ async function generarPDFProgramaAnual(data, anio) {
   const hoy = new Date();
   const fechaElaboracion = hoy.toLocaleDateString("es-MX");
 
-  // =========================
-  // HEADER SOLO PRIMERA PAGINA
-  // =========================
-
+  // HEADER
   doc.autoTable({
     startY: 10,
     margin: { left: 10, right: 10 },
@@ -1110,25 +1107,23 @@ async function generarPDFProgramaAnual(data, anio) {
         marca: item.marca || "",
         modelo: item.modelo || "",
         usuario: item.usuario || "Sin usuario",
-        meses: Array(12).fill(null)
+        meses: Array.from({ length: 12 }, () => [])
       };
     }
 
     const dia = parseInt(item.fecha_programada.split("-")[2]);
+    const mesIndex = item.mes - 1;
 
-    mapa[item.identificador].meses[item.mes - 1] = {
+    mapa[item.identificador].meses[mesIndex].push({
       estado: item.estado,
       dia: dia
-    };
+    });
+
   });
 
   const equipos = Object.keys(mapa);
 
   let startY = doc.lastAutoTable.finalY + 10;
-
-  // =========================
-  // PAGINACION EQUIPOS
-  // =========================
 
   for (let i = 0; i < equipos.length; i += equiposPorPagina) {
 
@@ -1146,11 +1141,12 @@ async function generarPDFProgramaAnual(data, anio) {
         equipo.usuario
       ];
 
-      equipo.meses.forEach(info => {
+      equipo.meses.forEach(lista => {
 
-        let cell = {
-          content: "",
-          styles: {
+          let cell = {
+            content: lista.length === 1 ? String(lista[0].dia) : "",
+            eventos: lista,
+            styles: {
             halign: "center",
             valign: "middle",
             lineWidth: 0.2,
@@ -1158,7 +1154,9 @@ async function generarPDFProgramaAnual(data, anio) {
           }
         };
 
-        if (info) {
+        if (lista.length === 1) {
+
+          const info = lista[0];
 
           cell.content = String(info.dia);
 
@@ -1180,6 +1178,7 @@ async function generarPDFProgramaAnual(data, anio) {
         }
 
         fila.push(cell);
+
       });
 
       body.push(fila);
@@ -1209,7 +1208,84 @@ async function generarPDFProgramaAnual(data, anio) {
       headStyles: {
         fillColor: [15,23,42],
         textColor: 255
-      }
+      },
+
+        didDrawCell: function(dataCell) {
+
+          if (dataCell.section !== 'body') return;
+
+          const lista = dataCell.cell.raw?.eventos || dataCell.cell.eventos;
+
+          if (!Array.isArray(lista)) return;
+
+          // Si existe realizado, ignoramos otros
+          const realizado = lista.find(e => e.estado === "Realizado");
+
+          if (realizado) {
+
+            const { x, y, width, height } = dataCell.cell;
+
+            dataCell.doc.setFillColor(34,197,94); // verde
+
+            dataCell.doc.rect(
+              x,
+              y,
+              width,
+              height,
+              "F"
+            );
+
+            dataCell.doc.setTextColor(255);
+
+            dataCell.doc.text(
+              String(realizado.dia),
+              x + width/2,
+              y + height/2 + 1,
+              { align: "center", baseline: "middle" }
+            );
+
+            return;
+          }
+
+          if (lista.length < 2) return;
+
+          const { x, y, width, height } = dataCell.cell;
+
+          const mitad = width / 2;
+
+          const colores = {
+            Pendiente: [245,158,11],
+            Cancelado: [239,68,68],
+            Realizado: [34,197,94]
+          };
+
+          lista.slice(0,2).forEach((m, i) => {
+
+            const color = colores[m.estado] || [200,200,200];
+
+            dataCell.doc.setFillColor(...color);
+
+            dataCell.doc.rect(
+              x + (i * mitad),
+              y,
+              mitad,
+              height,
+              "F"
+            );
+
+            dataCell.doc.setTextColor(255);
+
+            dataCell.doc.text(
+              String(m.dia),
+              x + (i * mitad) + mitad/2,
+              y + height/2 + 1,
+              { align: "center", baseline: "middle" }
+            );
+
+          });
+
+        }
+
     });
 
     if (i + equiposPorPagina < equipos.length) {
@@ -1219,9 +1295,7 @@ async function generarPDFProgramaAnual(data, anio) {
 
   }
 
-  // =========================
-  // MARCA DE AGUA TODAS PAGINAS
-  // =========================
+  // MARCA DE AGUA Y PAGINAS
 
   const totalPages = doc.internal.getNumberOfPages();
 
@@ -1246,9 +1320,7 @@ async function generarPDFProgramaAnual(data, anio) {
     doc.text(`Página ${i} de ${totalPages}`, pageWidth - 40, pageHeight - 10);
   }
 
-  // =========================
-  // LEYENDA ULTIMA PAGINA
-  // =========================
+  // LEYENDA
 
   doc.setPage(totalPages);
 

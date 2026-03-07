@@ -17,6 +17,7 @@ echo json_encode([
     'authenticated' => true,
     'num_emp' => $_SESSION['num_emp'],
     'nombre_usu' => $_SESSION['nombre_usu'],
-    'rol' => $_SESSION['rol'] ?? null
+    'rol' => $_SESSION['rol'] ?? null,
+    'rol_tickets' => $_SESSION['rol_tickets'] ?? 'usuario'
 ]);
 exit;

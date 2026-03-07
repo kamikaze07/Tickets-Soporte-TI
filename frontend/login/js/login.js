@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (data.success) {
 
-                if (data.rol === "SUPER USUARIO") {
+                if (data.rol_tickets === "admin") {
                     window.location.href = `${BASE_URL}/frontend/dashboard/admin/`;
                 } else {
                     window.location.href = `${BASE_URL}/frontend/dashboard/usuario/`;

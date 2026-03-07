@@ -85,21 +85,34 @@ try {
         exit;
     }
 
-    // =========================
-    // SESIÓN
-    // =========================
-    $_SESSION["logged"]   = true;
-    $_SESSION["usuario"]  = $user["nombre_usu"];
-    $_SESSION["rol"]      = $user["priv"];
-    $_SESSION["correo"]   = $user["correo"];
-    $_SESSION["nombre_usu"] = $user["nombre_usu"];
-    $_SESSION["num_emp"]  = $user["num_emp"];
+        // =========================
+        // ROLES DEL SISTEMA DE TICKETS
+        // =========================
+        $ticketAdmins = require __DIR__ . "/../config/tickets_admins.php";
 
-    echo json_encode([
-        "success" => true,
-        "message" => "Login correcto",
-        "rol"     => $user["priv"]
-    ]);
+        $rolTickets = "usuario";
+
+        if (in_array((int)$user["num_emp"], $ticketAdmins, true)) {
+            $rolTickets = "admin";
+        }
+
+        // =========================
+        // SESIÓN
+        // =========================
+        $_SESSION["logged"]   = true;
+        $_SESSION["usuario"]  = $user["nombre_usu"];
+        $_SESSION["rol"]      = $user["priv"]; // rol real DB
+        $_SESSION["rol_tickets"] = $rolTickets; // NUEVO
+        $_SESSION["correo"]   = $user["correo"];
+        $_SESSION["nombre_usu"] = $user["nombre_usu"];
+        $_SESSION["num_emp"]  = $user["num_emp"];
+
+        echo json_encode([
+            "success" => true,
+            "message" => "Login correcto",
+            "rol"     => $user["priv"],
+            "rol_tickets" => $rolTickets
+        ]);
 
 } catch (Exception $e) {
     http_response_code(500);

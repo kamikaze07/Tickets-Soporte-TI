@@ -3,6 +3,7 @@ header('Content-Type: application/json');
 session_start();
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../mail/mailer.php';
 
 // 🔒 Validar sesión
 if (!isset($_SESSION['num_emp'])) {
@@ -18,13 +19,12 @@ if (!isset($_SESSION['num_emp'])) {
 $raw = file_get_contents('php://input');
 $data = json_decode($raw, true);
 
-// 🚨 Si no llegó JSON, mostrar error
+// 🚨 Si no llegó JSON
 if (!$data) {
   http_response_code(400);
   echo json_encode([
     'ok' => false,
-    'msg' => 'No se recibieron datos',
-    'raw' => $raw
+    'msg' => 'No se recibieron datos'
   ]);
   exit;
 }
@@ -46,6 +46,7 @@ if ($titulo === '' || $descripcion === '') {
 }
 
 try {
+
   $sql = "
     INSERT INTO tickets
       (usuario_num_emp, titulo, descripcion, categoria, prioridad, status, created_at)
@@ -54,6 +55,7 @@ try {
   ";
 
   $stmt = $pdo->prepare($sql);
+
   $stmt->execute([
     ':usuario' => $_SESSION['num_emp'],
     ':titulo' => $titulo,
@@ -62,13 +64,40 @@ try {
     ':prioridad' => $prioridad
   ]);
 
+  // ID del ticket
+  $ticket_id = $pdo->lastInsertId();
+
+  // 📧 Enviar correo al admin
+  $asunto = "Nuevo Ticket de Soporte #$ticket_id";
+
+  $mensaje = "
+  <h2>Nuevo Ticket de Soporte</h2>
+
+  <p><b>Ticket:</b> #$ticket_id</p>
+  <p><b>Usuario:</b> {$_SESSION['nombre_usu']}</p>
+
+  <p><b>Título:</b> $titulo</p>
+
+  <p><b>Descripción:</b><br>$descripcion</p>
+  ";
+
+  enviarCorreo(
+    "sistemas2.poza@forsis.com.mx",
+    $asunto,
+    $mensaje
+  );
+
+  // Respuesta al frontend
   echo json_encode([
     'ok' => true,
     'msg' => 'Ticket creado correctamente',
-    'id' => $pdo->lastInsertId()
+    'id' => $ticket_id
   ]);
+
 } catch (Throwable $e) {
+
   http_response_code(500);
+
   echo json_encode([
     'ok' => false,
     'msg' => 'Error al crear ticket',

@@ -29,3 +29,14 @@ function requireRole(array $rolesPermitidos) {
         exit;
     }
 }
+
+function requireAdminTickets() {
+
+    requireAuth();
+
+    if (!isset($_SESSION['rol_tickets']) || $_SESSION['rol_tickets'] !== 'admin') {
+        http_response_code(403);
+        echo json_encode(['error' => 'Acceso restringido a administradores']);
+        exit;
+    }
+}
