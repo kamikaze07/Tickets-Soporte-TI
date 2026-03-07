@@ -16,6 +16,8 @@ let canvas;
 let ctx;
 let dibujando = false;
 
+
+let mantenimientoCancelar = null;
 /* ======================================
    DATOS MOCK (solo visual)
 ====================================== */
@@ -193,6 +195,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
     generarPDFProgramaAnual(data, anio);
   });
+
+    document.getElementById("btnCancelarCancelar").onclick = () => {
+      mantenimientoCancelar = null;
+      document.getElementById("modalCancelar").style.display = "none";
+    };
+
+    document.getElementById("btnConfirmarCancelacion").onclick = async () => {
+
+    const motivo = document.getElementById("motivoCancelacion").value.trim();
+
+    if (!motivo) {
+      alert("Debes ingresar el motivo de cancelación.");
+      return;
+    }
+
+    if (!mantenimientoCancelar) {
+      alert("Mantenimiento no válido.");
+      return;
+    }
+
+    const res = await fetch(
+      "/ticketssoporteti/backend/mantenimientos/cancel_mantenimiento.php",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          mantenimiento_id: mantenimientoCancelar,
+          motivo: motivo
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      alert(data.msg);
+      return;
+    }
+
+    document.getElementById("modalCancelar").style.display = "none";
+    mantenimientoCancelar = null;
+
+    alert("Mantenimiento cancelado correctamente");
+
+    calendar.refetchEvents();
+    renderVistaAnual();
+    renderTablaMes(currentYear, currentMonth);
+
+  };
+
 
 });
 
@@ -396,18 +451,37 @@ async function renderTablaMes(year, month) {
     tr.innerHTML = `
       <td>${m.id}</td>
       <td>${m.identificador}</td>
+      <td>${m.usuario}</td>
       <td>${m.tipo}</td>
       <td>${m.fecha_programada}</td>
       <td>${m.fecha_realizada || "-"}</td>
       <td>${m.estado}</td>
       <td>
         ${m.estado === "Pendiente"
-          ? `<button class="btn" onclick="abrirModalCerrar(${m.id})">
+          ? `
+            <button class="btn" onclick="abrirModalCerrar(${m.id})">
               Cerrar
-            </button>`
-          : `<button class="btn view" onclick="descargarPDFMantenimiento(${m.id})">
-                Descargar PDF
-            </button>`
+            </button>
+
+            <button class="btn cancel" onclick="abrirModalCancelar(${m.id})">
+              Cancelar
+            </button>
+            `
+
+          : m.estado === "Realizado"
+          ? `
+            <button class="btn view" onclick="descargarPDFMantenimiento(${m.id})">
+              Descargar PDF
+            </button>
+            `
+
+          : m.estado === "Cancelado"
+          ? `
+            <button class="btn cancel" onclick="verMotivoCancelacion('${m.motivo_cancelacion || "Sin motivo registrado"}')">
+              Ver motivo
+            </button>
+            `
+          : ""
         }
       </td>
     `;
@@ -955,6 +1029,7 @@ function blobToBase64(blob) {
 async function generarPDFProgramaAnual(data, anio) {
 
   const { jsPDF } = window.jspdf;
+
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
@@ -963,59 +1038,33 @@ async function generarPDFProgramaAnual(data, anio) {
 
   const margin = 15;
   const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
 
-  const folio = `PMA-${anio}-${Date.now().toString().slice(-4)}`;
+  const equiposPorPagina = 15;
 
-  // LOGO
   const logo = new Image();
   logo.src = "/ticketssoporteti/frontend/login/assets/logo-forsis.png";
   await new Promise(resolve => logo.onload = resolve);
 
-  const pageHeight = doc.internal.pageSize.getHeight();
-
-  // Marca de agua
-  doc.setGState(new doc.GState({ opacity: 0.05 }));
-
-  doc.addImage(
-    logo,
-    "PNG",
-    pageWidth / 2 - 70,
-    pageHeight / 2 - 70,
-    140,
-    140
-  );
-
-  doc.setGState(new doc.GState({ opacity: 1 }));
-
-  // Fecha elaboración dinámica (día del click)
   const hoy = new Date();
   const fechaElaboracion = hoy.toLocaleDateString("es-MX");
 
   // =========================
-  // CUADRO SUPERIOR FORMATO OFICIAL
+  // HEADER SOLO PRIMERA PAGINA
   // =========================
 
   doc.autoTable({
     startY: 10,
     margin: { left: 10, right: 10 },
     body: [
-
-      // FILA 1
       [
         { content: '', rowSpan: 5, styles: { cellWidth: 30 } },
         {
           content: 'FLETES Y MATERIALES FORSIS, S.A. DE C.V.',
           colSpan: 4,
-          styles: {
-            halign: 'center',
-            textColor: [220,38,38],
-            fontStyle: 'bold',
-            fontSize: 11
-          }
+          styles: { halign: 'center', textColor: [220,38,38], fontStyle: 'bold', fontSize: 11 }
         }
       ],
-
-      // FILA 2
       [
         {
           content: `Programa Anual de Mantenimiento Preventivo ${anio}`,
@@ -1023,24 +1072,18 @@ async function generarPDFProgramaAnual(data, anio) {
           styles: { halign: 'center', fontStyle: 'bold' }
         }
       ],
-
-      // FILA 3
       [
         { content: 'FECHA', styles: { fontStyle: 'bold' } },
         { content: '11/11/18' },
         { content: 'PAG.', styles: { fontStyle: 'bold' } },
         { content: '1 de 1' }
       ],
-
-      // FILA 4
       [
         { content: 'REVISIÓN', styles: { fontStyle: 'bold' } },
         { content: '0' },
         { content: 'CÓDIGO', styles: { fontStyle: 'bold' } },
         { content: 'FMF-FOR-SIS-002' }
       ],
-
-      // FILA 5
       [
         { content: 'Fecha de elaboración', styles: { fontStyle: 'bold' } },
         { content: fechaElaboracion },
@@ -1049,16 +1092,15 @@ async function generarPDFProgramaAnual(data, anio) {
       ]
     ],
     theme: "grid",
-    styles: {
-      fontSize: 8,
-      cellPadding: 2
-    }
+    styles: { fontSize: 8 }
   });
 
-  // Insertar logo encima del cuadro
   doc.addImage(logo, "PNG", 13, 13, 24, 24);
 
-  // Agrupar por equipo
+  // =========================
+  // AGRUPAR EQUIPOS
+  // =========================
+
   const mapa = {};
 
   data.forEach(item => {
@@ -1067,95 +1109,190 @@ async function generarPDFProgramaAnual(data, anio) {
       mapa[item.identificador] = {
         marca: item.marca || "",
         modelo: item.modelo || "",
-        usuario: item.usuario ? item.usuario : "Sin usuario",
+        usuario: item.usuario || "Sin usuario",
         meses: Array(12).fill(null)
       };
     }
 
-    // Guardamos el ESTADO real
-    mapa[item.identificador].meses[item.mes - 1] = item.estado;
-  });
+    const dia = parseInt(item.fecha_programada.split("-")[2]);
 
-const body = [];
-
-Object.keys(mapa).forEach(eq => {
-
-  const equipo = mapa[eq];
-
-  const fila = [
-    eq,
-    (equipo.marca + " " + equipo.modelo).trim(),
-    equipo.usuario
-  ];
-
-  equipo.meses.forEach(estado => {
-
-    let cell = {
-      content: "",
-      styles: {
-        lineWidth: 0.3
-      }
+    mapa[item.identificador].meses[item.mes - 1] = {
+      estado: item.estado,
+      dia: dia
     };
-
-    if (estado === "Realizado") {
-      cell.styles.fillColor = [34,197,94]; // verde
-    }
-
-    if (estado === "Pendiente") {
-      cell.styles.fillColor = [245,158,11]; // amarillo
-    }
-
-    if (estado === "Cancelado") {
-      cell.styles.fillColor = [239,68,68]; // rojo
-    }
-
-    fila.push(cell);
   });
 
-  body.push(fila);
-});
+  const equipos = Object.keys(mapa);
 
-  doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 10,
-    styles: {
-      fontSize: 7,
-      halign: "center",
-      valign: "middle"
-    },
-    columnStyles: {
-      0: { halign: "left" },
-      1: { halign: "left" },
-      2: { halign: "left" }
-    },
-    headStyles: {
-      fillColor: [15, 23, 42], // azul oscuro elegante
-      textColor: 255,
-      halign: "center",
-      fontStyle: "bold"
-    },
-  head: [[
-    "Equipo",
-    "Marca / Modelo",
-    "Usuario",
-    "Ene","Feb","Mar","Abr","May","Jun",
-    "Jul","Ago","Sep","Oct","Nov","Dic"
-  ]],
-    body: body,
-    theme: "grid",
-    styles: { fontSize: 7 }
-  });
+  let startY = doc.lastAutoTable.finalY + 10;
+
+  // =========================
+  // PAGINACION EQUIPOS
+  // =========================
+
+  for (let i = 0; i < equipos.length; i += equiposPorPagina) {
+
+    const slice = equipos.slice(i, i + equiposPorPagina);
+
+    const body = [];
+
+    slice.forEach(eq => {
+
+      const equipo = mapa[eq];
+
+      const fila = [
+        eq,
+        (equipo.marca + " " + equipo.modelo).trim(),
+        equipo.usuario
+      ];
+
+      equipo.meses.forEach(info => {
+
+        let cell = {
+          content: "",
+          styles: {
+            halign: "center",
+            valign: "middle",
+            lineWidth: 0.2,
+            fontStyle: "bold"
+          }
+        };
+
+        if (info) {
+
+          cell.content = String(info.dia);
+
+          if (info.estado === "Realizado") {
+            cell.styles.fillColor = [34,197,94];
+            cell.styles.textColor = 255;
+          }
+
+          if (info.estado === "Pendiente") {
+            cell.styles.fillColor = [245,158,11];
+            cell.styles.textColor = 0;
+          }
+
+          if (info.estado === "Cancelado") {
+            cell.styles.fillColor = [239,68,68];
+            cell.styles.textColor = 255;
+          }
+
+        }
+
+        fila.push(cell);
+      });
+
+      body.push(fila);
+
+    });
+
+    doc.autoTable({
+      startY: startY,
+      head: [[
+        "Equipo","Marca / Modelo","Usuario",
+        "Ene","Feb","Mar","Abr","May","Jun",
+        "Jul","Ago","Sep","Oct","Nov","Dic"
+      ]],
+      body: body,
+      theme: "grid",
+      styles: {
+        fontSize: 7,
+        halign: "center",
+        valign: "middle",
+        fillColor: false
+      },
+      columnStyles: {
+        0: { halign: "left" },
+        1: { halign: "left" },
+        2: { halign: "left" }
+      },
+      headStyles: {
+        fillColor: [15,23,42],
+        textColor: 255
+      }
+    });
+
+    if (i + equiposPorPagina < equipos.length) {
+      doc.addPage();
+      startY = 20;
+    }
+
+  }
+
+  // =========================
+  // MARCA DE AGUA TODAS PAGINAS
+  // =========================
 
   const totalPages = doc.internal.getNumberOfPages();
 
   for (let i = 1; i <= totalPages; i++) {
+
     doc.setPage(i);
-    doc.setFontSize(8);
-    doc.text(
-      `Página ${i} de ${totalPages}`,
-      pageWidth - 40,
-      doc.internal.pageSize.getHeight() - 10
+
+    doc.setGState(new doc.GState({ opacity: 0.05 }));
+
+    doc.addImage(
+      logo,
+      "PNG",
+      pageWidth / 2 - 70,
+      pageHeight / 2 - 70,
+      140,
+      140
     );
+
+    doc.setGState(new doc.GState({ opacity: 1 }));
+
+    doc.setFontSize(8);
+    doc.text(`Página ${i} de ${totalPages}`, pageWidth - 40, pageHeight - 10);
   }
 
+  // =========================
+  // LEYENDA ULTIMA PAGINA
+  // =========================
+
+  doc.setPage(totalPages);
+
+  let y = doc.lastAutoTable.finalY + 12;
+
+  doc.setFontSize(9);
+  doc.setFont(undefined, "bold");
+  doc.text("Leyenda:", 15, y);
+
+  y += 6;
+
+  doc.setFillColor(34,197,94);
+  doc.rect(15, y - 4, 6, 6, "F");
+  doc.setFont(undefined, "normal");
+  doc.text("Realizado", 24, y);
+
+  y += 7;
+
+  doc.setFillColor(245,158,11);
+  doc.rect(15, y - 4, 6, 6, "F");
+  doc.text("Pendiente", 24, y);
+
+  y += 7;
+
+  doc.setFillColor(239,68,68);
+  doc.rect(15, y - 4, 6, 6, "F");
+  doc.text("Cancelado", 24, y);
+
+  y += 7;
+
+  doc.text("Número dentro del cuadro = día programado del mantenimiento", 15, y);
+
   doc.save(`Programa_Anual_Mantenimiento_${anio}.pdf`);
+}
+
+function abrirModalCancelar(id) {
+
+  mantenimientoCancelar = id;
+
+  document.getElementById("motivoCancelacion").value = "";
+  document.getElementById("modalCancelar").style.display = "flex";
+
+}
+
+function verMotivoCancelacion(motivo) {
+  alert("Motivo de cancelación:\n\n" + motivo);
 }

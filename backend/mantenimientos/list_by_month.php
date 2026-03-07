@@ -26,17 +26,34 @@ try {
 
     $stmt = $pdo->prepare("
         SELECT 
-            m.id,
-            m.tipo,
-            m.fecha_programada,
-            m.fecha_realizada,
-            m.estado,
-            e.identificador
+        m.id,
+        e.identificador,
+
+        COALESCE(
+            CONCAT(emp.nombre,' ',emp.ap_pat,' ',emp.ap_mat),
+            'Sin usuario'
+        ) AS usuario,
+
+        m.tipo,
+        m.fecha_programada,
+        m.fecha_realizada,
+        m.estado,
+        m.motivo_cancelacion
+
         FROM mantenimientos m
-        INNER JOIN inventario_equipos e ON e.id = m.equipo_id
+
+        JOIN inventario_equipos e 
+        ON m.equipo_id = e.id
+
+        LEFT JOIN inventario_asignaciones ia 
+        ON ia.equipo_id = e.id 
+        AND ia.estado = 'activo'
+
+        LEFT JOIN empleados emp
+        ON emp.clave_emp = ia.num_emp
+
         WHERE YEAR(m.fecha_programada) = ?
         AND MONTH(m.fecha_programada) = ?
-        ORDER BY m.fecha_programada ASC
     ");
 
     $stmt->execute([$year, $month + 1]);

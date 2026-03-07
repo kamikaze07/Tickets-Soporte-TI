@@ -47,6 +47,58 @@ try {
     $criticos = (int)$stmt->fetch()['total'];
 
     /* =========================
+    Mantenimientos hoy
+    ========================= */
+
+    $stmt = $pdo->query("
+        SELECT COUNT(*) as total
+        FROM mantenimientos
+        WHERE DATE(fecha_programada) = CURDATE()
+        AND estado = 'Pendiente'
+    ");
+
+    $mantenimientosHoy = (int)$stmt->fetch()['total'];
+
+    /* =========================
+    Equipos con mantenimiento hoy
+    ========================= */
+
+    $stmt = $pdo->query("
+        SELECT 
+            e.identificador,
+            e.tipo,
+            emp.nombre,
+            emp.ap_pat
+        FROM mantenimientos m
+        JOIN inventario_equipos e 
+            ON e.id = m.equipo_id
+        LEFT JOIN inventario_asignaciones a
+            ON a.equipo_id = e.id
+            AND a.estado = 'activo'
+        LEFT JOIN empleados emp
+            ON emp.clave_emp = a.num_emp
+        WHERE DATE(m.fecha_programada) = CURDATE()
+        AND m.estado = 'Pendiente'
+    ");
+
+    $mantenimientosHoyLista = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    /* =========================
+    Próximos mantenimientos
+    (7 días)
+    ========================= */
+
+    $stmt = $pdo->query("
+        SELECT COUNT(*) as total
+        FROM mantenimientos
+        WHERE fecha_programada > CURDATE()
+        AND fecha_programada <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+        AND estado = 'Pendiente'
+    ");
+
+    $mantenimientosProximos = (int)$stmt->fetch()['total'];
+
+    /* =========================
        Últimos 5
     ========================= */
 
@@ -59,10 +111,13 @@ try {
 
     $ultimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo json_encode([
+        echo json_encode([
         'admin_nombre' => $_SESSION['nombre_usu'],
         'kpis' => $kpis,
         'criticos' => $criticos,
+        'mantenimientos_hoy' => $mantenimientosHoy,
+        'mantenimientos_proximos' => $mantenimientosProximos,
+        'mantenimientos_hoy_lista' => $mantenimientosHoyLista,
         'ultimos' => $ultimos
     ]);
 

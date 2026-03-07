@@ -106,9 +106,31 @@
       <div class="vista-mensual-layout">
 
         <!-- MINI CALENDARIO -->
-        <aside class="mini-calendar">
-          <div id="miniCalendar"></div>
-        </aside>
+    <aside class="mini-calendar">
+
+      <div id="miniCalendar"></div>
+
+      <!-- LEYENDA DE COLORES -->
+      <div class="calendar-legend">
+
+        <div class="legend-item">
+          <span class="legend-color pendiente"></span>
+          <span>Pendiente</span>
+        </div>
+
+        <div class="legend-item">
+          <span class="legend-color realizado"></span>
+          <span>Realizado</span>
+        </div>
+
+        <div class="legend-item">
+          <span class="legend-color cancelado"></span>
+          <span>Cancelado</span>
+        </div>
+
+      </div>
+
+    </aside>
 
         <!-- CALENDARIO PRINCIPAL -->
         <div class="calendar-main">
@@ -126,6 +148,7 @@
             <tr>
               <th>ID</th>
               <th>Equipo</th>
+              <th>Usuario</th>
               <th>Tipo</th>
               <th>Programada</th>
               <th>Realizada</th>
@@ -218,6 +241,35 @@
       </button>
       <button id="btnConfirmarCerrar" class="btn" disabled>
         Confirmar y Generar PDF
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =========================
+     MODAL CANCELAR MANTENIMIENTO
+========================= -->
+<div id="modalCancelar" class="modal">
+  <div class="modal-content">
+
+    <h3>Cancelar mantenimiento</h3>
+
+    <div class="form-group">
+      <label>Motivo de cancelación</label>
+      <textarea 
+        id="motivoCancelacion"
+        rows="4"
+        style="width:100%; padding:8px;"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button id="btnCancelarCancelar" class="btn cancel">
+        Cerrar
+      </button>
+
+      <button id="btnConfirmarCancelacion" class="btn">
+        Confirmar cancelación
       </button>
     </div>
 

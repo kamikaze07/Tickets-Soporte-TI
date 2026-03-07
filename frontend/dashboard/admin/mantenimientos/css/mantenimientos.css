@@ -102,6 +102,9 @@
   padding: 18px;
   border-radius: 14px;
   box-shadow: 0 4px 10px rgba(0,0,0,.05);
+
+  width: 100%;
+  overflow: hidden;
 }
 
 /* FullCalendar ajustes */
@@ -131,14 +134,25 @@
 
 /* Preventivo pendiente */
 .event-preventivo-pendiente {
-  background: #fef3c7 !important;
-  color: #92400e !important;
+  background: #fbbf24 !important;
+  border: 1px solid #d97706 !important;
+  color: #1f2937 !important;
+  font-weight: 600;
 }
 
 /* Preventivo realizado */
+/* Preventivo realizado */
 .event-preventivo-realizado {
-  background: #dcfce7 !important;
-  color: #166534 !important;
+  background: #22c55e !important;
+  border: 1px solid #16a34a !important;
+}
+
+/* texto del evento */
+.event-preventivo-realizado .fc-event-title,
+.event-preventivo-realizado .fc-event-time,
+.event-preventivo-realizado {
+  color: #052e16 !important;
+  font-weight: 600;
 }
 
 /* Correctivo */
@@ -446,4 +460,62 @@
 .btn.cancel {
   background: #dc2626;
   color: #fff;
+}
+
+.event-cancelado {
+  background: #ef4444 !important;
+  border: 1px solid #b91c1c !important;
+  color: white !important;
+}
+
+.fc-daygrid-event {
+  white-space: normal !important;
+  line-height: 1.2;
+}
+
+.fc-daygrid-event .fc-event-title {
+  white-space: normal !important;
+  word-break: break-word;
+  font-size: 11px;
+}
+
+.fc-daygrid-day-frame {
+  min-height: 120px;
+}
+
+/* =========================
+   LEYENDA CALENDARIO
+========================= */
+
+.calendar-legend {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+/* Colores */
+.legend-color.pendiente {
+  background: #fbbf24;
+}
+
+.legend-color.realizado {
+  background: #22c55e;
+}
+
+.legend-color.cancelado {
+  background: #ef4444;
 }

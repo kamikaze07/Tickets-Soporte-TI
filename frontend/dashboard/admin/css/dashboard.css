@@ -801,3 +801,43 @@ tbody tr:hover {
 .sidebar.collapsed .sidebar-menu li .material-icons {
   font-size: 22px;
 }
+
+.preview-hover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 260px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.15);
+  padding: 10px;
+  font-size: 13px;
+  display: none;
+  z-index: 20;
+}
+
+.stat-card {
+  position: relative;
+}
+
+.stat-card:hover .preview-hover {
+  display: block;
+}
+
+.preview-item {
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.preview-item:hover {
+  background: #f1f5f9;
+}
+
+.preview-equipo {
+  font-weight: 600;
+}
+
+.preview-user {
+  color: #64748b;
+  font-size: 12px;
+}

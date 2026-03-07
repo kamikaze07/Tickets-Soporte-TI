@@ -58,6 +58,9 @@ try {
         if ($row['tipo'] === 'Correctivo') {
             $className = 'event-correctivo';
         }
+        if ($row['estado'] === 'Cancelado') {
+            $className = 'event-cancelado';
+        }
 
         $eventos[] = [
             'id'    => $row['id'],

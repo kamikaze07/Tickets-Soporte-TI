@@ -1,6 +1,7 @@
 const BASE_PATH = '/ticketssoporteti';
 let chartInstance = null;
 let refreshInterval = null;
+let mantenimientosHoyLista = [];
 
 document.addEventListener('DOMContentLoaded', () => {
   initSidebar();
@@ -92,6 +93,9 @@ async function cargarDashboard(animate = true) {
 
   if (!data || !data.kpis) return;
 
+  mantenimientosHoyLista = data.mantenimientos_hoy_lista || [];
+  renderPreviewMantenimientos();
+
   /* Nombre real admin */
   const headerUser = document.querySelector('.header-user');
   if (headerUser) {
@@ -103,6 +107,8 @@ async function cargarDashboard(animate = true) {
   updateKpi('kpiProceso', data.kpis['En Proceso'], animate);
   updateKpi('kpiEspera', data.kpis['En Espera'], animate);
   updateKpi('kpiCerrados', data.kpis['Cerrado'], animate);
+  updateKpi('kpiMantHoy', data.mantenimientos_hoy || 0, animate);
+  updateKpi('kpiMantProx', data.mantenimientos_proximos || 0, animate);
 
   /* Indicador visual si hay abiertos */
   const openCard = document.querySelector('.stat-card.open');
@@ -111,6 +117,16 @@ async function cargarDashboard(animate = true) {
       openCard.classList.add('alert');
     } else {
       openCard.classList.remove('alert');
+    }
+  }
+
+  const mantCard = document.getElementById('cardMantHoy');
+
+  if (mantCard) {
+    if ((data.mantenimientos_hoy || 0) > 0) {
+      mantCard.classList.add('alert');
+    } else {
+      mantCard.classList.remove('alert');
     }
   }
 
@@ -241,4 +257,35 @@ function renderEstado(estado) {
 
 function formatDate(date) {
   return new Date(date).toLocaleDateString();
+}
+
+function renderPreviewMantenimientos() {
+
+  const box = document.getElementById('previewMantHoy');
+  if (!box) return;
+
+  box.innerHTML = '';
+
+  if (!mantenimientosHoyLista.length) {
+    box.innerHTML = "<div class='preview-item'>No hay mantenimientos hoy</div>";
+    return;
+  }
+
+  mantenimientosHoyLista.forEach(m => {
+
+    const div = document.createElement('div');
+    div.className = 'preview-item';
+
+    const usuario = m.nombre
+      ? `${m.nombre} ${m.ap_pat}`
+      : 'Disponible';
+
+    div.innerHTML = `
+      <div class="preview-equipo">${m.identificador}</div>
+      <div class="preview-user">${usuario}</div>
+    `;
+
+    box.appendChild(div);
+
+  });
 }

@@ -67,6 +67,7 @@ try {
         FROM mantenimientos
         WHERE equipo_id = ?
         AND tipo = 'Preventivo'
+        AND estado != 'Cancelado'
         AND YEAR(fecha_programada) = YEAR(?)
         AND MONTH(fecha_programada) = MONTH(?)
     ");
