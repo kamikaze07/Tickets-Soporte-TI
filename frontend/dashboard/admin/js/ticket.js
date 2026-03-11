@@ -174,7 +174,7 @@ function renderTicket(ticket) {
     `#${ticket.id} – ${ticket.titulo}`;
 
   document.getElementById('ticketUsuario').textContent =
-    ticket.usuario_num_emp;
+    ticket.usuario_nombre ?? ticket.usuario_num_emp;
 
   document.getElementById('ticketPrioridad').textContent =
     ticket.prioridad;

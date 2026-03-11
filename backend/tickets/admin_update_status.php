@@ -21,7 +21,6 @@ $data = json_decode(file_get_contents('php://input'), true);
 $ticketId = $data['ticket_id'] ?? null;
 $status   = $data['status'] ?? null;
 
-// Estados válidos
 $validStatus = ['Abierto', 'En Proceso', 'En Espera', 'Cerrado'];
 
 if (!$ticketId || !in_array($status, $validStatus)) {
@@ -32,7 +31,10 @@ if (!$ticketId || !in_array($status, $validStatus)) {
 
 try {
 
-  // Actualizar estado del ticket
+  /* =========================
+     ACTUALIZAR ESTADO
+  ========================= */
+
   $stmt = $pdo->prepare("
     UPDATE tickets
     SET status = :status
@@ -44,7 +46,10 @@ try {
     ':id'     => $ticketId
   ]);
 
-  // Obtener correo del usuario dueño del ticket
+  /* =========================
+     OBTENER CORREO DEL USUARIO
+  ========================= */
+
   $stmtUser = $pdo->prepare("
     SELECT u.correo
     FROM tickets t
@@ -57,26 +62,109 @@ try {
   $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
   $correo_usuario = $user['correo'] ?? null;
 
-  // Enviar correo si existe
-  if ($correo_usuario) {
-
-    $asunto = "Actualización de Ticket #$ticketId";
-
-    $mensaje = "
-    <h2>Actualización de Ticket</h2>
-
-    <p><b>Ticket:</b> #$ticketId</p>
-    <p><b>Nuevo estado:</b> $status</p>
-
-    <p>Puedes revisar el ticket entrando al sistema.</p>
-    ";
-
-    enviarCorreo(
-      $correo_usuario,
-      $asunto,
-      $mensaje
-    );
+  if (!$correo_usuario) {
+    echo json_encode(['ok' => true]);
+    exit;
   }
+
+  /* =========================
+     CONSTRUIR CORREO
+  ========================= */
+
+  $asunto = "[Soporte TI] Ticket #$ticketId actualizado - $status";
+
+  $mensaje = "
+  <div style='font-family:Arial;background:#f4f6f8;padding:20px'>
+    <div style='max-width:600px;margin:auto;background:#ffffff;border-radius:8px;padding:20px;border:1px solid #e5e7eb'>
+
+      <h2 style='color:#c62828;margin-top:0'>Sistema de Soporte TI</h2>
+
+      <p>El estado de tu ticket ha sido actualizado.</p>
+
+      <div style='background:#f9fafb;padding:15px;border-radius:6px;border:1px solid #eee'>
+        <p><b>Ticket:</b> #$ticketId</p>
+        <p><b>Nuevo estado:</b> <span style='color:#c62828;font-weight:bold'>$status</span></p>
+      </div>
+  ";
+
+  /* =========================
+     HISTORIAL SI SE CIERRA
+  ========================= */
+
+  if ($status === 'Cerrado') {
+
+    try {
+
+      $stmtHist = $pdo->prepare("
+        SELECT autor, comentario, created_at
+        FROM ticket_comentarios
+        WHERE ticket_id = :ticket
+        ORDER BY created_at DESC
+        LIMIT 10
+      ");
+
+      $stmtHist->execute([':ticket' => $ticketId]);
+
+      $mensajes = $stmtHist->fetchAll(PDO::FETCH_ASSOC);
+
+      if ($mensajes) {
+
+        $mensaje .= "
+        <h3 style='margin-top:25px'>Historial reciente del ticket</h3>
+        <div style='background:#f9fafb;padding:15px;border-radius:6px;border:1px solid #eee'>
+        ";
+
+        foreach (array_reverse($mensajes) as $m) {
+
+          $autor = htmlspecialchars($m['autor']);
+          $comentario = nl2br(htmlspecialchars($m['comentario']));
+          $fecha = date("d/m/Y H:i", strtotime($m['created_at']));
+
+          $mensaje .= "
+          <p style='margin-bottom:12px'>
+            <b>$autor</b>
+            <span style='color:#666;font-size:12px'>($fecha)</span><br>
+            $comentario
+          </p>
+          ";
+        }
+
+        $mensaje .= "</div>";
+      }
+
+    } catch (Exception $e) {
+      // Si falla el historial, no rompemos el correo
+    }
+  }
+
+  /* =========================
+     BOTÓN VER TICKET
+  ========================= */
+
+  $link = "http://192.168.1.209/ticketssoporteti/frontend/dashboard/usuario/?ticket=$ticketId";
+
+  $mensaje .= "
+      <div style='margin-top:25px;text-align:center'>
+        <a href='$link'
+           style='background:#c62828;color:#fff;padding:10px 18px;
+           text-decoration:none;border-radius:4px;font-weight:bold'>
+           Ver ticket
+        </a>
+      </div>
+
+      <p style='margin-top:30px;font-size:12px;color:#666;text-align:center'>
+        Sistema de Soporte TI
+      </p>
+
+    </div>
+  </div>
+  ";
+
+  /* =========================
+     ENVIAR CORREO
+  ========================= */
+
+  enviarCorreo($correo_usuario, $asunto, $mensaje);
 
   echo json_encode([
     'ok' => true,

@@ -30,8 +30,11 @@ $stmt = $pdo->prepare("
     t.prioridad,
     t.categoria,
     t.created_at,
-    t.usuario_num_emp
+    t.usuario_num_emp,
+    CONCAT(e.nombre,' ',e.ap_pat,' ',e.ap_mat) AS usuario_nombre
   FROM tickets t
+  LEFT JOIN empleados e
+    ON e.clave_emp = t.usuario_num_emp
   WHERE t.id = ?
 ");
 

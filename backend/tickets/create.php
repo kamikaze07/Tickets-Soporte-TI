@@ -5,6 +5,7 @@ session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../mail/mailer.php';
 
+
 // 🔒 Validar sesión
 if (!isset($_SESSION['num_emp'])) {
   http_response_code(401);
@@ -86,6 +87,18 @@ try {
     $asunto,
     $mensaje
   );
+
+  require_once __DIR__ . '/../notifications/telegram.php';
+
+  $mensajeTelegram = "🚨 NUEVO TICKET #$ticket_id\n\n"
+                    ."Empleado: ".$_SESSION['num_emp']."\n"
+                    ."Usuario: ".$_SESSION['nombre_usu']."\n"
+                    ."Categoría: ".$categoria."\n"
+                    ."Prioridad: ".$prioridad."\n"
+                    ."Problema: ".$descripcion."\n";
+
+  enviarTelegram($mensajeTelegram);
+
 
   // Respuesta al frontend
   echo json_encode([
