@@ -15,9 +15,7 @@ $stmt = $pdo->prepare("
         e.modelo,
         e.estado,
         e.especificaciones_json,
-        emp.nombre,
-        emp.ap_pat,
-        emp.ap_mat
+        CONCAT(emp.nombre,' ',emp.ap_pat,' ',emp.ap_mat) AS asignado_a
     FROM inventario_equipos e
     LEFT JOIN inventario_asignaciones a
         ON a.equipo_id = e.id
@@ -31,16 +29,6 @@ $stmt = $pdo->prepare("
 
 $stmt->execute([':token' => $token]);
 $equipo = $stmt->fetch();
-
-$nombreAsignado = null;
-
-if (!empty($equipo['nombre'])) {
-    $nombreAsignado = trim(
-        $equipo['nombre'] . ' ' .
-        $equipo['ap_pat'] . ' ' .
-        $equipo['ap_mat']
-    );
-}
 
 if (!$equipo) {
     die("Equipo no encontrado");
@@ -116,6 +104,14 @@ h1 {
     font-size: 12px;
     color: #777;
 }
+
+.asignado-box{
+    margin-top:15px;
+    padding:12px;
+    border-radius:8px;
+    background:#eef5ff;
+    border-left:4px solid #2b6cb0;
+}
 </style>
 </head>
 <body>
@@ -136,12 +132,15 @@ h1 {
             <?= htmlspecialchars($equipo['estado']) ?>
         </span>
     </p>
-    <p>
-    <strong>Asignado a:</strong>
-    <?= $nombreAsignado 
-        ? htmlspecialchars($nombreAsignado) 
-        : "Disponible" ?>
-    </p>
+    <div class="asignado-box">
+
+    <strong>Usuario asignado</strong><br>
+
+    <?= !empty($equipo['asignado_a']) 
+        ? htmlspecialchars($equipo['asignado_a']) 
+        : "Equipo disponible" ?>
+
+    </div>
 
     <?php if ($equipo['marca']): ?>
         <p><strong>Marca:</strong> <?= htmlspecialchars($equipo['marca']) ?></p>
