@@ -1,5 +1,9 @@
 const BASE_PATH = '/ticketssoporteti';
 
+let CURRENT_PAGE = 1;
+const LIMIT = 10;
+let TOTAL_ROWS = 0;
+
 document.addEventListener('DOMContentLoaded', () => {
   initSidebar();
   initLogout();
@@ -49,29 +53,76 @@ function initLogout() {
 /* =========================
    LOAD TICKETS
 ========================= */
-let ALL_TICKETS = [];
 
-async function cargarTickets() {
-  const res = await fetch(
-    `${BASE_PATH}/backend/tickets/admin_list.php`,
-    { credentials: 'include' }
-  );
+async function cargarTickets(page = 1) {
 
-  ALL_TICKETS = await res.json();
-  renderTickets(ALL_TICKETS);
+  try {
+
+    const estado = document.getElementById('filterEstado').value;
+    const prioridad = document.getElementById('filterPrioridad').value;
+
+    const params = new URLSearchParams({
+      page: page,
+      limit: LIMIT,
+      estado: estado,
+      prioridad: prioridad
+    });
+
+    const res = await fetch(
+      `${BASE_PATH}/backend/tickets/admin_list.php?${params}`,
+      { credentials: 'include' }
+    );
+
+    if (!res.ok) throw new Error("Error cargando tickets");
+
+    const result = await res.json();
+
+    CURRENT_PAGE = result.page;
+    TOTAL_ROWS = result.total;
+
+    renderTickets(result.data);
+    renderPagination();
+
+  } catch (err) {
+
+    console.error(err);
+    alert("No se pudieron cargar los tickets");
+
+  }
+
 }
 
 function renderTickets(tickets) {
+
   const tbody = document.getElementById('ticketsTable');
   tbody.innerHTML = '';
 
+  if(!tickets.length){
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;color:#64748b;">
+          No hay tickets
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
   tickets.forEach(t => {
+
     const tr = document.createElement('tr');
 
     tr.innerHTML = `
       <td>${t.id}</td>
       <td>${t.titulo}</td>
-      <td>${t.usuario_num_emp}</td>
+      <td>
+        ${t.usuario}
+        <div style="font-size:11px;color:#64748b">
+          ${t.usuario_num_emp}
+        </div>
+      </td>
       <td>${renderEstado(t.status)}</td>
       <td class="prioridad ${t.prioridad}">${t.prioridad}</td>
       <td>${formatDate(t.created_at)}</td>
@@ -83,6 +134,7 @@ function renderTickets(tickets) {
     `;
 
     tbody.appendChild(tr);
+
   });
 }
 
@@ -90,20 +142,8 @@ function renderTickets(tickets) {
    FILTERS
 ========================= */
 function filtrarTickets() {
-  const estado = document.getElementById('filterEstado').value;
-  const prioridad = document.getElementById('filterPrioridad').value;
-
-  let filtrados = ALL_TICKETS;
-
-  if (estado) {
-    filtrados = filtrados.filter(t => t.status === estado);
-  }
-
-  if (prioridad) {
-    filtrados = filtrados.filter(t => t.prioridad === prioridad);
-  }
-
-  renderTickets(filtrados);
+  CURRENT_PAGE = 1;
+  cargarTickets(1);
 }
 
 /* =========================
@@ -126,4 +166,30 @@ function formatDate(date) {
 
 function verTicket(id) {
   window.location.href = `ticket.html?id=${id}`;
+}
+
+function renderPagination(){
+
+  const totalPages = Math.ceil(TOTAL_ROWS / LIMIT);
+
+  const container = document.getElementById('pagination');
+  container.innerHTML = '';
+
+  if(totalPages <= 1) return;
+
+  for(let i = 1; i <= totalPages; i++){
+
+    const btn = document.createElement('button');
+
+    btn.className = "page-btn";
+    btn.innerText = i;
+
+    if(i === CURRENT_PAGE){
+      btn.classList.add('active');
+    }
+
+    btn.onclick = () => cargarTickets(i);
+
+    container.appendChild(btn);
+  }
 }

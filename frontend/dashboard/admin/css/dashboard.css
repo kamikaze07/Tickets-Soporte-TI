@@ -841,3 +841,27 @@ tbody tr:hover {
   color: #64748b;
   font-size: 12px;
 }
+
+.pagination{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin-top:16px;
+}
+
+.page-btn{
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  background:#e5e7eb;
+  cursor:pointer;
+}
+
+.page-btn:hover{
+  background:#cbd5f5;
+}
+
+.page-btn.active{
+  background:#4f46e5;
+  color:white;
+}
